@@ -2,14 +2,17 @@
 import { Link } from '@inertiajs/vue3';
 import {
     BadgeDollarSign,
+    BarChart3,
     Bell,
     Building2,
     CalendarCheck2,
     Car,
     Database,
     FileCheck2,
+    FolderLock,
     Landmark,
     LayoutGrid,
+    Megaphone,
     Receipt,
     RotateCcw,
     ScrollText,
@@ -43,10 +46,13 @@ import { index as rolesIndex } from '@/routes/admin/roles';
 import { index as usersIndex } from '@/routes/admin/users';
 import { index as consignmentsIndex } from '@/routes/consignments';
 import { index as customersIndex } from '@/routes/customers';
+import { index as documentsIndex } from '@/routes/documents';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as financeIndex } from '@/routes/finance';
+import { index as marketingIndex } from '@/routes/marketing';
 import { index as notificationsIndex } from '@/routes/notifications';
 import { index as ownersIndex } from '@/routes/owners';
+import { index as reportsIndex } from '@/routes/reports';
 import { index as reservationsIndex } from '@/routes/reservations';
 import { index as salesIndex } from '@/routes/sales';
 import { index as settlementsIndex } from '@/routes/settlements';
@@ -158,6 +164,35 @@ const navGroups = computed<NavGroup[]>(() => {
                     icon: Landmark,
                     iconClass: 'text-emerald-300',
                     permission: 'finance.view',
+                },
+            ],
+        },
+        {
+            label: 'Marketing, Vault & Reports',
+            items: [
+                {
+                    title: 'Marketing & Ads',
+                    href: marketingIndex(),
+                    icon: Megaphone,
+                    iconClass: 'text-pink-400',
+                    permission: 'marketing.view',
+                },
+                {
+                    title: 'Document Vault',
+                    href: documentsIndex(),
+                    icon: FolderLock,
+                    iconClass: 'text-amber-300',
+                    permission: 'documents.view',
+                },
+                {
+                    title: 'Reports & Exports',
+                    href: reportsIndex(),
+                    icon: BarChart3,
+                    iconClass: 'text-sky-300',
+                    anyPermissions: [
+                        'reports.view_operational',
+                        'reports.view_financial',
+                    ],
                 },
             ],
         },
