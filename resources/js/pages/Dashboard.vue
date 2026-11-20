@@ -98,11 +98,7 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                         Register Vehicle
                     </Link>
                 </Button>
-                <Button
-                    v-if="can('sales.create')"
-                    as-child
-                    class="min-h-10"
-                >
+                <Button v-if="can('sales.create')" as-child class="min-h-10">
                     <Link :href="createSale()">
                         <BadgeDollarSign
                             class="mr-1.5 size-4"
@@ -212,8 +208,12 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
         <Deferred data="operational">
             <template #fallback>
                 <div class="grid gap-5 lg:grid-cols-2">
-                    <div class="h-64 animate-pulse rounded-xl border bg-muted/40" />
-                    <div class="h-64 animate-pulse rounded-xl border bg-muted/40" />
+                    <div
+                        class="h-64 animate-pulse rounded-xl border bg-muted/40"
+                    />
+                    <div
+                        class="h-64 animate-pulse rounded-xl border bg-muted/40"
+                    />
                 </div>
             </template>
 

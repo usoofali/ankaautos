@@ -57,7 +57,9 @@ defineOptions({
                                     : 'Operational'
                             "
                             :variant="
-                                item.category === 'financial' ? 'info' : 'neutral'
+                                item.category === 'financial'
+                                    ? 'info'
+                                    : 'neutral'
                             "
                         />
                     </div>
@@ -69,7 +71,9 @@ defineOptions({
                     </p>
                 </div>
 
-                <div class="mt-5 flex flex-wrap items-center gap-2 border-t pt-4">
+                <div
+                    class="mt-5 flex flex-wrap items-center gap-2 border-t pt-4"
+                >
                     <Button as-child size="sm" class="min-h-9 flex-1">
                         <Link :href="show(item.slug)">
                             Open Report

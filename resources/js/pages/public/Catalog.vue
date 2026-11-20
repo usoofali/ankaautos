@@ -147,12 +147,8 @@ function whatsappHref(message: string): string {
         </header>
 
         <!-- Hero Section (Anka Deep Navy + Crimson Accent) -->
-        <section
-            class="relative overflow-hidden bg-[#0A2E5C] text-white"
-        >
-            <div
-                class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
-            >
+        <section class="relative overflow-hidden bg-[#0A2E5C] text-white">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
                 <div class="max-w-3xl">
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full bg-[#DC141E]/20 px-3 py-1 text-xs font-semibold tracking-wide text-rose-200 ring-1 ring-[#DC141E]/40"
@@ -168,7 +164,9 @@ function whatsappHref(message: string): string {
                     <p
                         class="mt-3 max-w-2xl text-sm text-slate-200 sm:text-base"
                     >
-                        Explore inspected company-owned and verified consignment vehicles currently on our stand. Live availability updated directly from our inventory.
+                        Explore inspected company-owned and verified consignment
+                        vehicles currently on our stand. Live availability
+                        updated directly from our inventory.
                     </p>
                 </div>
 
@@ -193,11 +191,7 @@ function whatsappHref(message: string): string {
                         class="min-h-11 rounded-md border border-input bg-background px-3 text-sm"
                     >
                         <option value="">All Brands</option>
-                        <option
-                            v-for="b in brands"
-                            :key="b.id"
-                            :value="b.id"
-                        >
+                        <option v-for="b in brands" :key="b.id" :value="b.id">
                             {{ b.name }}
                         </option>
                     </select>
@@ -263,7 +257,8 @@ function whatsappHref(message: string): string {
                     No matching vehicles found
                 </h3>
                 <p class="mt-1 text-sm text-muted-foreground">
-                    Try adjusting your filters or reach out to our sales team for incoming stock.
+                    Try adjusting your filters or reach out to our sales team
+                    for incoming stock.
                 </p>
                 <Button
                     v-if="search || brandId || categoryId || maxPrice"
@@ -275,10 +270,7 @@ function whatsappHref(message: string): string {
                 </Button>
             </div>
 
-            <div
-                v-else
-                class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-            >
+            <div v-else class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <article
                     v-for="v in vehicles.data"
                     :key="v.id"

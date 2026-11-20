@@ -158,7 +158,7 @@ class ReportService
         $rows = [];
 
         foreach ($vehicles as $v) {
-            $cost = $v->purchase_price !== null ? Money::fromDecimal($v->purchase_price) : Money::zero();
+            $cost = $v->acquisition_cost !== null ? Money::fromDecimal($v->acquisition_cost) : Money::zero();
             $adv = $v->advertised_price !== null ? Money::fromDecimal($v->advertised_price) : Money::zero();
             $totalCost = $totalCost->add($cost);
             $totalAdvertised = $totalAdvertised->add($adv);
@@ -461,8 +461,8 @@ class ReportService
 
             if ($s->ownership_type === OwnershipType::CompanyOwned) {
                 $saleRevenue = Money::fromDecimal($s->final_price);
-                $purchaseCost = $s->vehicle?->purchase_price !== null
-                    ? Money::fromDecimal($s->vehicle->purchase_price)
+                $purchaseCost = $s->vehicle?->acquisition_cost !== null
+                    ? Money::fromDecimal($s->vehicle->acquisition_cost)
                     : Money::zero();
                 $cost = $purchaseCost->add($vehicleExpenses);
                 $profit = $saleRevenue->subtract($cost);

@@ -173,7 +173,9 @@ function queryParams(): Record<string, string> {
             >
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="border-b bg-muted/40 text-left text-xs font-semibold text-muted-foreground uppercase">
+                        <tr
+                            class="border-b bg-muted/40 text-left text-xs font-semibold text-muted-foreground uppercase"
+                        >
                             <th
                                 v-for="header in report.headers"
                                 :key="header"

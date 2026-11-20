@@ -37,7 +37,7 @@ class DashboardMetricsService
     {
         $monthStart = now()->startOfMonth();
 
-        $recentSales = Sale::query()
+        $recentSales = array_values(Sale::query()
             ->with(['vehicle.brand:id,name', 'vehicle.model:id,name', 'customer:id,name'])
             ->latest('confirmed_at')
             ->limit(6)
@@ -50,12 +50,11 @@ class DashboardMetricsService
                 'final_price' => $s->final_price,
                 'status_label' => $s->status->label(),
                 'status_variant' => $s->status->badgeVariant(),
-                'confirmed_at' => $s->confirmed_at->toISOString(),
+                'confirmed_at' => (string) $s->confirmed_at->toISOString(),
             ])
-            ->values()
-            ->all();
+            ->all());
 
-        $recentActivities = ActivityLog::query()
+        $recentActivities = array_values(ActivityLog::query()
             ->with('user:id,name')
             ->latest('created_at')
             ->limit(8)
@@ -67,8 +66,7 @@ class DashboardMetricsService
                 'actor' => $a->user->name ?? 'System',
                 'created_at' => $a->created_at?->toISOString(),
             ])
-            ->values()
-            ->all();
+            ->all());
 
         return [
             'total_vehicles' => Vehicle::query()->where('status', '!=', VehicleStatus::Archived->value)->count(),

@@ -61,7 +61,7 @@ class MarketingController extends Controller
                     'advertised_price' => $v->advertised_price,
                     'status_label' => $v->status->label(),
                     'status_variant' => $v->status->badgeVariant(),
-                    'is_publicly_listed' => $v->is_publicly_listed,
+                    'is_publicly_listed' => $v->is_public_listing,
                     'photos_count' => $v->photos_count,
                     'photo_url' => $v->primaryPhoto?->url(),
                     'has_ad' => $adCount > 0,
@@ -72,7 +72,7 @@ class MarketingController extends Controller
         return Inertia::render('marketing/Index', [
             'vehicles' => $vehicles,
             'summary' => [
-                'public_count' => Vehicle::query()->where('is_publicly_listed', true)->where('status', VehicleStatus::Available->value)->count(),
+                'public_count' => Vehicle::query()->where('is_public_listing', true)->where('status', VehicleStatus::Available->value)->count(),
                 'ads_count' => Advertisement::query()->count(),
                 'shares_count' => AdvertisementShare::query()->count(),
             ],
@@ -137,7 +137,7 @@ class MarketingController extends Controller
                 'slug' => $vehicle->slug,
                 'title' => $vehicle->displayName(),
                 'advertised_price' => $vehicle->advertised_price,
-                'is_publicly_listed' => $vehicle->is_publicly_listed,
+                'is_publicly_listed' => $vehicle->is_public_listing,
                 'status_label' => $vehicle->status->label(),
                 'status_variant' => $vehicle->status->badgeVariant(),
                 'photos' => $vehicle->photos->map(static fn ($p): array => [
@@ -151,7 +151,7 @@ class MarketingController extends Controller
                 'id' => $advertisement?->id,
                 'headline' => $advertisement->headline ?? $defaultHeadline,
                 'caption' => $advertisement->caption ?? $defaultCaption,
-                'selected_photo_ids' => $advertisement?->selected_photo_ids
+                'selected_photo_ids' => $advertisement->selected_photo_ids
                     ?? $vehicle->photos->pluck('id')->values()->all(),
             ],
             'listingUrl' => $listingUrl,
@@ -174,7 +174,7 @@ class MarketingController extends Controller
         ]);
 
         if (array_key_exists('is_publicly_listed', $validated)) {
-            $vehicle->update(['is_publicly_listed' => (bool) $validated['is_publicly_listed']]);
+            $vehicle->update(['is_public_listing' => (bool) $validated['is_publicly_listed']]);
         }
 
         $advertisement = Advertisement::query()->where('vehicle_id', $vehicle->id)->latest('id')->first();
@@ -281,7 +281,7 @@ class MarketingController extends Controller
 
         $index = 1;
         foreach ($photos as $photo) {
-            $fullPath = Storage::disk($photo->disk)->path($photo->file_path);
+            $fullPath = Storage::disk($photo->disk)->path($photo->path);
             if (is_file($fullPath)) {
                 $ext = pathinfo($fullPath, PATHINFO_EXTENSION) ?: 'jpg';
                 $zip->addFile($fullPath, sprintf('%s-photo-%02d.%s', $vehicle->reference_number, $index, $ext));

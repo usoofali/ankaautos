@@ -33,13 +33,13 @@ class PublicListingController extends Controller
                 'condition:id,name',
                 'primaryPhoto',
             ])
-            ->where('is_publicly_listed', true)
+            ->where('is_public_listing', true)
             ->whereIn('status', [VehicleStatus::Available->value, VehicleStatus::Reserved->value])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($sub) use ($search): void {
-                    $sub->where('trim', 'like', "%{$search}%")
-                        ->orWhere('exterior_colour', 'like', "%{$search}%")
-                        ->orWhere('public_description', 'like', "%{$search}%")
+                    $sub->where('exterior_colour', 'like', "%{$search}%")
+                        ->orWhere('general_description', 'like', "%{$search}%")
+                        ->orWhere('reference_number', 'like', "%{$search}%")
                         ->orWhereHas('brand', fn ($q) => $q->where('name', 'like', "%{$search}%"))
                         ->orWhereHas('model', fn ($q) => $q->where('name', 'like', "%{$search}%"));
                 });
@@ -99,7 +99,7 @@ class PublicListingController extends Controller
 
     public function show(Vehicle $vehicle): Response
     {
-        abort_unless($vehicle->is_publicly_listed, 404);
+        abort_unless($vehicle->is_public_listing, 404);
 
         $vehicle->load([
             'brand:id,name',
@@ -139,18 +139,19 @@ class PublicListingController extends Controller
                 'year' => $vehicle->year,
                 'brand' => $vehicle->brand->name ?? '',
                 'model' => $vehicle->model->name ?? '',
-                'trim' => $vehicle->trim,
                 'category' => $vehicle->category->name ?? '',
                 'condition' => $vehicle->condition->name ?? '',
                 'transmission' => $vehicle->transmission->label(),
                 'fuel_type' => $vehicle->fuel_type->label(),
                 'drive_type' => $vehicle->drive_type?->label(),
-                'engine_size' => $vehicle->engine_size,
+                'steering_position' => $vehicle->steering_position->label(),
+                'doors' => $vehicle->doors,
                 'mileage' => $vehicle->mileage,
                 'exterior_colour' => $vehicle->exterior_colour,
                 'interior_colour' => $vehicle->interior_colour,
                 'advertised_price' => $vehicle->advertised_price,
-                'public_description' => $vehicle->public_description,
+                'public_description' => $vehicle->general_description,
+                'accessories' => $vehicle->accessories,
                 'status' => $vehicle->status->value,
                 'status_label' => $availabilityLabel,
                 'status_variant' => $availabilityVariant,
@@ -173,7 +174,7 @@ class PublicListingController extends Controller
             ],
         ])->withViewData([
             'ogTitle' => "{$vehicle->displayName()} — {$priceText} | ".($business['company_name'] ?? 'Anka Auto Sales'),
-            'ogDescription' => $vehicle->public_description ?: "{$vehicle->displayName()} ({$vehicle->transmission->label()}, {$vehicle->fuel_type->label()}) — {$availabilityLabel}. Contact Anka Auto Sales today.",
+            'ogDescription' => $vehicle->general_description ?: "{$vehicle->displayName()} ({$vehicle->transmission->label()}, {$vehicle->fuel_type->label()}) — {$availabilityLabel}. Contact Anka Auto Sales today.",
             'ogImage' => $ogImage,
             'ogUrl' => route('public.listings.show', $vehicle->slug),
         ]);

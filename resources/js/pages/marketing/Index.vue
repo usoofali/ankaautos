@@ -71,7 +71,9 @@ const columns: DataTableColumn[] = [
     { key: 'actions', label: 'Actions', align: 'right' },
 ];
 
-function updateQuery(overrides: Record<string, string | number | undefined>): void {
+function updateQuery(
+    overrides: Record<string, string | number | undefined>,
+): void {
     router.get(
         index.url(),
         {
@@ -123,7 +125,9 @@ function updateQuery(overrides: Record<string, string | number | undefined>): vo
             :per-page="filters.per_page"
             empty-title="No vehicles available to promote"
             empty-description="Register vehicles in inventory first to create adverts and share links."
-            @update:search="(v) => updateQuery({ search: v || undefined, page: 1 })"
+            @update:search="
+                (v) => updateQuery({ search: v || undefined, page: 1 })
+            "
             @update:per-page="(p) => updateQuery({ per_page: p, page: 1 })"
         >
             <template #mobile-card="{ row }">
@@ -155,10 +159,14 @@ function updateQuery(overrides: Record<string, string | number | undefined>): vo
                             </p>
                         </div>
                     </div>
-                    <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-2"
+                    >
                         <StatusBadge
                             :label="
-                                row.is_publicly_listed ? 'Listed Publicly' : 'Hidden'
+                                row.is_publicly_listed
+                                    ? 'Listed Publicly'
+                                    : 'Hidden'
                             "
                             :variant="
                                 row.is_publicly_listed ? 'success' : 'neutral'
@@ -213,7 +221,9 @@ function updateQuery(overrides: Record<string, string | number | undefined>): vo
                 <td class="px-4 py-3.5">
                     <StatusBadge
                         :label="
-                            row.is_publicly_listed ? 'Public Catalog' : 'Private'
+                            row.is_publicly_listed
+                                ? 'Public Catalog'
+                                : 'Private'
                         "
                         :variant="
                             row.is_publicly_listed ? 'success' : 'neutral'
@@ -240,7 +250,12 @@ function updateQuery(overrides: Record<string, string | number | undefined>): vo
                                 <ExternalLink class="size-4" />
                             </a>
                         </Button>
-                        <Button as-child variant="outline" size="sm" class="min-h-9">
+                        <Button
+                            as-child
+                            variant="outline"
+                            size="sm"
+                            class="min-h-9"
+                        >
                             <Link :href="builder(row.id)">
                                 <Sparkles class="mr-1.5 size-3.5" />
                                 Ad Builder

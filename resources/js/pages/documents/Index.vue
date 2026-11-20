@@ -92,7 +92,9 @@ function formatBytes(bytes: number): string {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 }
 
-function updateQuery(overrides: Record<string, string | number | undefined>): void {
+function updateQuery(
+    overrides: Record<string, string | number | undefined>,
+): void {
     router.get(
         index.url(),
         {
@@ -162,7 +164,9 @@ function confirmArchive(): void {
             :per-page="filters.per_page"
             empty-title="No documents stored yet"
             empty-description="Upload vehicle customs papers, identification cards, or signed agreements into the private vault."
-            @update:search="(v) => updateQuery({ search: v || undefined, page: 1 })"
+            @update:search="
+                (v) => updateQuery({ search: v || undefined, page: 1 })
+            "
             @update:per-page="(p) => updateQuery({ per_page: p, page: 1 })"
         >
             <template #filters>
@@ -286,7 +290,8 @@ function confirmArchive(): void {
                 <DialogHeader>
                     <DialogTitle>Upload Private Document</DialogTitle>
                     <DialogDescription>
-                        Stored privately off the web root (max 10 MB; PDF, JPG, PNG, WEBP, DOC/DOCX).
+                        Stored privately off the web root (max 10 MB; PDF, JPG,
+                        PNG, WEBP, DOC/DOCX).
                     </DialogDescription>
                 </DialogHeader>
                 <form class="space-y-4" @submit.prevent="submitUpload">

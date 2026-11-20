@@ -91,7 +91,9 @@ function togglePhoto(photoId: number): void {
 
 const photoPackHref = computed(() => {
     const params = new URLSearchParams();
-    form.selected_photo_ids.forEach((id) => params.append('photo_ids[]', String(id)));
+    form.selected_photo_ids.forEach((id) =>
+        params.append('photo_ids[]', String(id)),
+    );
     const query = params.toString();
     return `${photoPack.url(props.vehicle.id)}${query ? `?${query}` : ''}`;
 });
@@ -102,7 +104,9 @@ function save(): void {
     });
 }
 
-function recordShare(platform: 'whatsapp' | 'facebook' | 'instagram' | 'link_copy'): void {
+function recordShare(
+    platform: 'whatsapp' | 'facebook' | 'instagram' | 'link_copy',
+): void {
     if (!props.canManage) {
         return;
     }
@@ -192,7 +196,8 @@ async function copyInstagramCaption(): Promise<void> {
                                 for="is_publicly_listed"
                                 class="cursor-pointer"
                             >
-                                Publish vehicle on the public Anka Auto Sales storefront
+                                Publish vehicle on the public Anka Auto Sales
+                                storefront
                             </Label>
                         </div>
 
@@ -231,7 +236,8 @@ async function copyInstagramCaption(): Promise<void> {
                         v-if="vehicle.photos.length === 0"
                         class="text-sm text-muted-foreground"
                     >
-                        No photos uploaded for this vehicle yet. Upload photos on the vehicle detail page.
+                        No photos uploaded for this vehicle yet. Upload photos
+                        on the vehicle detail page.
                     </p>
                     <div
                         v-else
@@ -255,7 +261,9 @@ async function copyInstagramCaption(): Promise<void> {
                                 class="size-full object-cover"
                             />
                             <span
-                                v-if="form.selected_photo_ids.includes(photo.id)"
+                                v-if="
+                                    form.selected_photo_ids.includes(photo.id)
+                                "
                                 class="absolute top-2 right-2 flex size-6 items-center justify-center rounded-full bg-[#DC141E] text-white shadow"
                             >
                                 <Check class="size-3.5" />

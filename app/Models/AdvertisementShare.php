@@ -4,7 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int|null $advertisement_id
+ * @property int $vehicle_id
+ * @property string $platform
+ * @property int|null $shared_by
+ * @property Carbon $shared_at
+ * @property string|null $notes
+ */
 class AdvertisementShare extends Model
 {
     public $timestamps = false;

@@ -25,18 +25,19 @@ const props = defineProps<{
         year: number;
         brand: string;
         model: string;
-        trim: string | null;
         category: string;
         condition: string;
         transmission: string;
         fuel_type: string;
         drive_type: string | null;
-        engine_size: string | null;
+        steering_position: string;
+        doors: number | null;
         mileage: number | null;
         exterior_colour: string;
         interior_colour: string | null;
         advertised_price: string | null;
         public_description: string | null;
+        accessories: string | null;
         status: string;
         status_label: string;
         status_variant: StatusVariant;
@@ -294,12 +295,12 @@ async function copyLink(): Promise<void> {
                                     {{ vehicle.interior_colour }}
                                 </dd>
                             </div>
-                            <div v-if="vehicle.engine_size">
+                            <div>
                                 <dt class="text-xs text-muted-foreground">
-                                    Engine
+                                    Steering
                                 </dt>
                                 <dd class="font-medium">
-                                    {{ vehicle.engine_size }}
+                                    {{ vehicle.steering_position }}
                                 </dd>
                             </div>
                             <div v-if="vehicle.drive_type">
