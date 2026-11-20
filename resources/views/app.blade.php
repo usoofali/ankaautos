@@ -5,6 +5,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="color-scheme" content="light dark">
 
+        @if(!empty($ogTitle))
+            <meta property="og:type" content="website">
+            <meta property="og:site_name" content="{{ config('app.name', 'Anka Auto Sales') }}">
+            <meta property="og:title" content="{{ $ogTitle }}">
+            <meta property="og:description" content="{{ $ogDescription ?? '' }}">
+            <meta property="og:image" content="{{ $ogImage ?? url('/og-image.png') }}">
+            <meta property="og:url" content="{{ $ogUrl ?? url()->current() }}">
+            <meta name="twitter:card" content="summary_large_image">
+            <meta name="twitter:title" content="{{ $ogTitle }}">
+            <meta name="twitter:description" content="{{ $ogDescription ?? '' }}">
+            <meta name="twitter:image" content="{{ $ogImage ?? url('/og-image.png') }}">
+        @endif
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
