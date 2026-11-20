@@ -90,7 +90,7 @@ test('reservations require positive deposit, mark vehicle reserved, and carry de
     expect($sale->status)->toBe(SaleStatus::Completed)
         ->and($sale->amount_paid)->toBe('15000000.00')
         ->and($sale->balance_due)->toBe('0.00')
-        ->and($reservation->fresh()->status)->toBe(ReservationStatus::ConvertedToSale)
+        ->and($reservation->fresh()->status)->toBe(ReservationStatus::Converted)
         ->and($vehicle->fresh()->status)->toBe(VehicleStatus::Sold);
 
     // Download sales agreement and receipt PDFs
@@ -243,7 +243,7 @@ test('cancelling consignment sale refunds customer, reverts vehicle and consignm
     $sale = Sale::query()->where('vehicle_id', $vehicle->id)->firstOrFail();
     $settlement = OwnerSettlement::query()->where('sale_id', $sale->id)->firstOrFail();
 
-    expect($settlement->status)->toBe(SettlementStatus::ReadyForPayout)
+    expect($settlement->status)->toBe(SettlementStatus::PendingPayout)
         ->and($expense->fresh()->settled_in_owner_settlement_id)->toBe($settlement->id);
 
     // Cancel sale before owner payout succeeds
@@ -292,7 +292,7 @@ test('cancelling consignment sale refunds customer, reverts vehicle and consignm
             'payment_method_id' => $method->id,
             'financial_account_id' => $account->id,
         ])
-        ->assertSessionHasErrors('sale');
+        ->assertSessionHasErrors('cancellation_reason');
 
     expect($sale2->fresh()->status)->toBe(SaleStatus::Completed);
 });

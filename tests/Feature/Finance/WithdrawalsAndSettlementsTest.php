@@ -86,7 +86,7 @@ test('consignment withdrawal enforces strict 100 percent cash-first payment befo
             'recipient_name' => $owner->name,
             'recipient_phone' => $owner->phone,
         ])
-        ->assertSessionHasErrors('withdrawal');
+        ->assertSessionHasErrors('recipient_name');
 
     expect($withdrawal->fresh()->status)->toBe(WithdrawalStatus::AwaitingPayment);
 
@@ -100,7 +100,7 @@ test('consignment withdrawal enforces strict 100 percent cash-first payment befo
         ])
         ->assertRedirect();
 
-    expect($withdrawal->fresh()->status)->toBe(WithdrawalStatus::ClearedForHandover)
+    expect($withdrawal->fresh()->status)->toBe(WithdrawalStatus::PaidReadyForHandover)
         ->and($withdrawal->fresh()->balance_due)->toBe('0.00');
 
     // Complete handover -> succeeds, locks expense, marks consignment & vehicle Withdrawn
@@ -179,7 +179,7 @@ test('owner settlement stays locked until customer pays 100 percent, then unlock
             'financial_account_id' => $account->id,
             'paid_at' => now()->toDateString(),
         ])
-        ->assertSessionHasErrors('settlement');
+        ->assertSessionHasErrors('amount');
 
     // Customer pays final ₦4,000,000 -> settlement automatically unlocks!
     $this->actingAs($manager)
@@ -191,7 +191,7 @@ test('owner settlement stays locked until customer pays 100 percent, then unlock
         ])
         ->assertRedirect();
 
-    expect($settlement->fresh()->status)->toBe(SettlementStatus::ReadyForPayout);
+    expect($settlement->fresh()->status)->toBe(SettlementStatus::PendingPayout);
 
     // Partial owner payout (₦6,000,000)
     $this->actingAs($manager)

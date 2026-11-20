@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\ExpenseBearer;
 use App\Enums\ExpensePaymentStatus;
+use App\Models\Consignment;
 use App\Models\ExpenseCategory;
 use App\Models\Vehicle;
 use App\Models\VehicleExpense;
@@ -35,5 +36,14 @@ class VehicleExpenseFactory extends Factory
             'expense_date' => now()->toDateString(),
             'vendor_name' => fake()->company(),
         ];
+    }
+
+    public function ownerDeductible(Consignment $consignment): static
+    {
+        return $this->state(fn (): array => [
+            'vehicle_id' => $consignment->vehicle_id,
+            'consignment_id' => $consignment->id,
+            'borne_by' => ExpenseBearer::OwnerDeductible,
+        ]);
     }
 }
