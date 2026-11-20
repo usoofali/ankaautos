@@ -2,7 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Role;
+use App\Models\User;
+use App\Services\BusinessSettingService;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -15,6 +20,10 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function __construct(
+        private BusinessSettingService $businessSettings,
+    ) {}
 
     /**
      * Determines the current asset version.
@@ -35,13 +44,88 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        /** @var User|null $user */
+        $user = $request->user();
+        $business = $this->businessSettings->publicProfile();
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
+            'name' => $business['company_name'] ?: config('app.name'),
+            'business' => $business,
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user !== null ? $this->serializeUser($user) : null,
+                'permissions' => $user !== null ? $user->getAllPermissions()->pluck('name')->values()->all() : [],
+                'roles' => $user !== null ? $user->roles->map(static fn (Role $role): array => [
+                    'name' => $role->name,
+                    'display_name' => $role->display_name ?? $role->name,
+                ])->values()->all() : [],
+            ],
+            'notifications' => $user !== null ? $this->serializeNotifications($user) : [
+                'unread_count' => 0,
+                'recent' => [],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function serializeUser(User $user): array
+    {
+        $user->loadMissing('roles');
+        /** @var Role|null $primaryRole */
+        $primaryRole = $user->roles->first();
+
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'is_active' => $user->is_active,
+            'email_verified_at' => $user->email_verified_at?->toISOString(),
+            'last_login_at' => $user->last_login_at?->toISOString(),
+            'primary_role' => $primaryRole?->display_name ?? $primaryRole?->name,
+            'created_at' => $user->created_at?->toISOString(),
+            'updated_at' => $user->updated_at?->toISOString(),
+        ];
+    }
+
+    /**
+     * @return array{unread_count: int, recent: list<array<string, mixed>>}
+     */
+    private function serializeNotifications(User $user): array
+    {
+        if (! Schema::hasTable('notifications')) {
+            return ['unread_count' => 0, 'recent' => []];
+        }
+
+        $unreadCount = $user->unreadNotifications()->count();
+        $recent = $user->notifications()
+            ->latest()
+            ->limit(5)
+            ->get()
+            ->map(static function (DatabaseNotification $notification): array {
+                /** @var array<string, mixed> $data */
+                $data = $notification->data;
+
+                return [
+                    'id' => $notification->id,
+                    'title' => (string) ($data['title'] ?? 'Notification'),
+                    'message' => (string) ($data['message'] ?? ''),
+                    'category' => (string) ($data['category'] ?? 'general'),
+                    'action_url' => isset($data['action_url']) ? (string) $data['action_url'] : null,
+                    'severity' => (string) ($data['severity'] ?? 'info'),
+                    'read_at' => $notification->read_at?->toISOString(),
+                    'created_at' => $notification->created_at?->toISOString(),
+                ];
+            })
+            ->values()
+            ->all();
+
+        return [
+            'unread_count' => $unreadCount,
+            'recent' => $recent,
         ];
     }
 }
