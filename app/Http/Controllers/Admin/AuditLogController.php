@@ -34,7 +34,7 @@ class AuditLogController extends Controller
                 ->withQueryString()
                 ->through(static fn (ActivityLog $log): array => [
                     'id' => $log->id,
-                    'user_name' => $log->user?->name ?? 'System',
+                    'user_name' => $log->user !== null ? $log->user->name : 'System',
                     'user_email' => $log->user?->email,
                     'action' => $log->action,
                     'description' => $log->description,
@@ -57,7 +57,7 @@ class AuditLogController extends Controller
                 ->withQueryString()
                 ->through(static fn (AuditLog $log): array => [
                     'id' => $log->id,
-                    'user_name' => $log->user?->name ?? 'System',
+                    'user_name' => $log->user !== null ? $log->user->name : 'System',
                     'user_email' => $log->user?->email,
                     'event' => $log->event,
                     'auditable_type' => class_basename($log->auditable_type),

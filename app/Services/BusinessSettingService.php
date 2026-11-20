@@ -85,7 +85,7 @@ class BusinessSettingService
     {
         return [
             'company_name' => 'Anka Auto Sales',
-            'tagline' => 'Trusted Dealership & Consignment Management',
+            'tagline' => 'Quality Vehicles. Trusted Deals.',
             'address' => 'Plot 14, Aminu Kano Crescent, Wuse II, Abuja, Nigeria',
             'phone' => '+234 803 000 0000',
             'whatsapp_number' => '2348030000000',

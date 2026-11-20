@@ -13,5 +13,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
+require __DIR__.'/inventory.php';
+require __DIR__.'/expenses.php';
+require __DIR__.'/sales.php';
+require __DIR__.'/finance.php';
 require __DIR__.'/admin.php';
 require __DIR__.'/settings.php';

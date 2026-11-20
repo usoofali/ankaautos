@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
-import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { home } from '@/routes';
 
@@ -21,24 +20,25 @@ const companyName = computed(
         class="relative flex min-h-svh flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/50 px-4 py-8 sm:px-6 md:p-10"
     >
         <div
-            class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-800 via-brand-amber to-slate-800"
+            class="pointer-events-none absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#0A2E5C] via-[#DC141E] to-[#0A2E5C]"
         />
         <div class="w-full max-w-md">
-            <div class="mb-6 flex flex-col items-center gap-3 text-center">
+            <div class="mb-6 flex flex-col items-center gap-2 text-center">
                 <Link
                     :href="home()"
-                    class="group flex flex-col items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                    class="group inline-flex items-center justify-center rounded-2xl bg-white/95 px-5 py-3 shadow-xs ring-1 ring-border/70 transition-transform hover:scale-[1.01] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
-                    <div
-                        class="flex size-12 items-center justify-center rounded-xl bg-slate-900 text-brand-amber shadow-md ring-1 ring-brand-amber/30 transition-transform group-hover:scale-105 dark:bg-brand-amber dark:text-brand-amber-foreground"
-                    >
-                        <AppLogoIcon class="size-7" />
-                    </div>
-                    <span
-                        class="text-sm font-semibold tracking-wide text-foreground uppercase"
-                    >
-                        {{ companyName }}
-                    </span>
+                    <picture>
+                        <source
+                            srcset="/logo-transparent.webp"
+                            type="image/webp"
+                        />
+                        <img
+                            src="/logo-transparent.png"
+                            :alt="companyName"
+                            class="h-14 w-auto object-contain sm:h-16"
+                        />
+                    </picture>
                 </Link>
             </div>
 

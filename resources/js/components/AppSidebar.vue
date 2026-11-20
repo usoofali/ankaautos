@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
 import {
+    BadgeDollarSign,
     Bell,
     Building2,
+    CalendarCheck2,
+    Car,
     Database,
+    FileCheck2,
+    Landmark,
     LayoutGrid,
+    Receipt,
+    RotateCcw,
     ScrollText,
     ShieldCheck,
+    UserRound,
+    UserSquare2,
     Users,
+    Wallet,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
@@ -31,7 +41,17 @@ import { edit as businessSettingsEdit } from '@/routes/admin/business-settings';
 import { index as masterDataIndex } from '@/routes/admin/master-data';
 import { index as rolesIndex } from '@/routes/admin/roles';
 import { index as usersIndex } from '@/routes/admin/users';
+import { index as consignmentsIndex } from '@/routes/consignments';
+import { index as customersIndex } from '@/routes/customers';
+import { index as expensesIndex } from '@/routes/expenses';
+import { index as financeIndex } from '@/routes/finance';
 import { index as notificationsIndex } from '@/routes/notifications';
+import { index as ownersIndex } from '@/routes/owners';
+import { index as reservationsIndex } from '@/routes/reservations';
+import { index as salesIndex } from '@/routes/sales';
+import { index as settlementsIndex } from '@/routes/settlements';
+import { index as vehiclesIndex } from '@/routes/vehicles';
+import { index as withdrawalsIndex } from '@/routes/withdrawals';
 import type { NavGroup } from '@/types';
 
 const { can, canAny } = usePermissions();
@@ -53,6 +73,91 @@ const navGroups = computed<NavGroup[]>(() => {
                     href: notificationsIndex(),
                     icon: Bell,
                     iconClass: 'text-sky-400',
+                },
+            ],
+        },
+        {
+            label: 'Inventory & Consignment',
+            items: [
+                {
+                    title: 'Vehicle Inventory',
+                    href: vehiclesIndex(),
+                    icon: Car,
+                    iconClass: 'text-amber-300',
+                    permission: 'vehicles.view',
+                },
+                {
+                    title: 'Vehicle Owners',
+                    href: ownersIndex(),
+                    icon: UserSquare2,
+                    iconClass: 'text-teal-400',
+                    permission: 'owners.view',
+                },
+                {
+                    title: 'Consignments',
+                    href: consignmentsIndex(),
+                    icon: FileCheck2,
+                    iconClass: 'text-indigo-400',
+                    permission: 'consignments.view',
+                },
+                {
+                    title: 'Withdrawals',
+                    href: withdrawalsIndex(),
+                    icon: RotateCcw,
+                    iconClass: 'text-rose-300',
+                    permission: 'withdrawals.view',
+                },
+            ],
+        },
+        {
+            label: 'Sales & Customers',
+            items: [
+                {
+                    title: 'Customers',
+                    href: customersIndex(),
+                    icon: UserRound,
+                    iconClass: 'text-cyan-300',
+                    permission: 'customers.view',
+                },
+                {
+                    title: 'Reservations',
+                    href: reservationsIndex(),
+                    icon: CalendarCheck2,
+                    iconClass: 'text-violet-300',
+                    permission: 'reservations.view',
+                },
+                {
+                    title: 'Vehicle Sales',
+                    href: salesIndex(),
+                    icon: BadgeDollarSign,
+                    iconClass: 'text-emerald-400',
+                    permission: 'sales.view',
+                },
+            ],
+        },
+        {
+            label: 'Finance & Settlements',
+            items: [
+                {
+                    title: 'Vehicle Expenses',
+                    href: expensesIndex(),
+                    icon: Receipt,
+                    iconClass: 'text-orange-400',
+                    permission: 'expenses.view',
+                },
+                {
+                    title: 'Owner Settlements',
+                    href: settlementsIndex(),
+                    icon: Wallet,
+                    iconClass: 'text-lime-400',
+                    permission: 'settlements.view',
+                },
+                {
+                    title: 'Financial Ledger',
+                    href: financeIndex(),
+                    icon: Landmark,
+                    iconClass: 'text-emerald-300',
+                    permission: 'finance.view',
                 },
             ],
         },

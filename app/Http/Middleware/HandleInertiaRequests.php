@@ -55,9 +55,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user !== null ? $this->serializeUser($user) : null,
                 'permissions' => $user !== null ? $user->getAllPermissions()->pluck('name')->values()->all() : [],
-                'roles' => $user !== null ? $user->roles->map(static fn (Role $role): array => [
-                    'name' => $role->name,
-                    'display_name' => $role->display_name ?? $role->name,
+                'roles' => $user !== null ? $user->roles->map(static fn ($role): array => [
+                    'name' => $role instanceof Role ? $role->name : (string) $role->getAttribute('name'),
+                    'display_name' => $role instanceof Role ? ($role->display_name ?? $role->name) : (string) $role->getAttribute('name'),
                 ])->values()->all() : [],
             ],
             'notifications' => $user !== null ? $this->serializeNotifications($user) : [
@@ -74,7 +74,6 @@ class HandleInertiaRequests extends Middleware
     private function serializeUser(User $user): array
     {
         $user->loadMissing('roles');
-        /** @var Role|null $primaryRole */
         $primaryRole = $user->roles->first();
 
         return [
@@ -85,7 +84,7 @@ class HandleInertiaRequests extends Middleware
             'is_active' => $user->is_active,
             'email_verified_at' => $user->email_verified_at?->toISOString(),
             'last_login_at' => $user->last_login_at?->toISOString(),
-            'primary_role' => $primaryRole?->display_name ?? $primaryRole?->name,
+            'primary_role' => $primaryRole instanceof Role ? ($primaryRole->display_name ?? $primaryRole->name) : null,
             'created_at' => $user->created_at?->toISOString(),
             'updated_at' => $user->updated_at?->toISOString(),
         ];
@@ -125,7 +124,7 @@ class HandleInertiaRequests extends Middleware
 
         return [
             'unread_count' => $unreadCount,
-            'recent' => $recent,
+            'recent' => array_values($recent),
         ];
     }
 }

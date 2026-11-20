@@ -10,10 +10,12 @@ use App\Models\DocumentCategory;
 use App\Models\ExpenseCategory;
 use App\Models\FinancialAccount;
 use App\Models\PaymentMethod;
+use App\Models\TransactionCharge;
 use App\Models\User;
 use App\Models\VehicleBrand;
 use App\Models\VehicleCategory;
 use App\Models\VehicleCondition;
+use App\Models\VehicleExpense;
 use App\Models\VehicleModel;
 use App\Services\AuditLogger;
 use Illuminate\Database\Eloquent\Model;
@@ -189,6 +191,24 @@ class MasterDataController extends Controller
             Inertia::flash('toast', [
                 'type' => 'error',
                 'message' => 'Cannot delete this brand because it has vehicle models linked to it. Deactivate it instead.',
+            ]);
+
+            return back();
+        }
+
+        if ($type === 'expense_categories' && VehicleExpense::query()->where('expense_category_id', $id)->exists()) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete this expense category because historical expenses reference it. Deactivate it instead.',
+            ]);
+
+            return back();
+        }
+
+        if ($type === 'charge_categories' && TransactionCharge::query()->where('charge_category_id', $id)->exists()) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Cannot delete this charge category because historical transactions reference it. Deactivate it instead.',
             ]);
 
             return back();

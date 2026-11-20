@@ -52,7 +52,6 @@ class UserController extends Controller
             ->paginate($perPage)
             ->withQueryString()
             ->through(static function (User $user): array {
-                /** @var Role|null $role */
                 $role = $user->roles->first();
 
                 return [
@@ -61,8 +60,8 @@ class UserController extends Controller
                     'email' => $user->email,
                     'phone' => $user->phone,
                     'is_active' => $user->is_active,
-                    'role_name' => $role?->name,
-                    'role_display_name' => $role?->display_name ?? $role?->name ?? 'Unassigned',
+                    'role_name' => $role instanceof Role ? $role->name : null,
+                    'role_display_name' => $role instanceof Role ? ($role->display_name ?? $role->name) : 'Unassigned',
                     'last_login_at' => $user->last_login_at?->toISOString(),
                     'created_at' => $user->created_at?->toISOString(),
                 ];
@@ -152,7 +151,6 @@ class UserController extends Controller
     public function edit(User $user): Response
     {
         $user->load('roles');
-        /** @var Role|null $role */
         $role = $user->roles->first();
 
         $roles = Role::query()
@@ -171,7 +169,7 @@ class UserController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'is_active' => $user->is_active,
-                'role' => $role?->name ?? '',
+                'role' => $role instanceof Role ? $role->name : '',
                 'last_login_at' => $user->last_login_at?->toISOString(),
             ],
             'roles' => $roles,
@@ -197,7 +195,7 @@ class UserController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone,
-            'role' => $user->roles->first()?->name,
+            'role' => $user->getRoleNames()->first(),
             'is_active' => $user->is_active,
         ];
 
