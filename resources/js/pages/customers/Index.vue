@@ -125,7 +125,8 @@ function updateQuery(overrides: Record<string, string | number>): void {
                             {{ row.name }}
                         </Link>
                         <p class="font-mono text-xs text-muted-foreground">
-                            {{ row.reference_number }} · {{ row.category_label }}
+                            {{ row.reference_number }} ·
+                            {{ row.category_label }}
                         </p>
                     </div>
                     <div
@@ -192,7 +193,12 @@ function updateQuery(overrides: Record<string, string | number>): void {
                     {{ row.sales_count }}
                 </td>
                 <td class="px-4 py-3.5 text-right">
-                    <Button as-child variant="outline" size="sm" class="min-h-9">
+                    <Button
+                        as-child
+                        variant="outline"
+                        size="sm"
+                        class="min-h-9"
+                    >
                         <Link :href="show(row.id)">
                             <Eye class="mr-1.5 size-3.5" aria-hidden="true" />
                             Open

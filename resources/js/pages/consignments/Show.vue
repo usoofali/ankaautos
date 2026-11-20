@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Download, FileEdit, History } from '@lucide/vue';
+import { ArrowLeft, Download, FileEdit, History, Undo2 } from '@lucide/vue';
 import { ref } from 'vue';
 import FormSectionCard from '@/components/anka/FormSectionCard.vue';
 import PageHeader from '@/components/anka/PageHeader.vue';
@@ -21,10 +21,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useFormatting } from '@/composables/useFormatting';
+import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
 import { agreementPdf, amendTerms, index } from '@/routes/consignments';
 import { show as showOwner } from '@/routes/owners';
 import { show as showVehicle } from '@/routes/vehicles';
+import { create as createWithdrawal } from '@/routes/withdrawals';
 
 const props = defineProps<{
     consignment: {
@@ -106,6 +108,7 @@ defineOptions({
     },
 });
 
+const { can } = usePermissions();
 const { formatMoney, formatDate, formatDateTime } = useFormatting();
 const amendOpen = ref(false);
 
@@ -153,6 +156,27 @@ function submitAmendment(): void {
                         <Download class="mr-1.5 size-4" aria-hidden="true" />
                         Agreement PDF
                     </a>
+                </Button>
+                <Button
+                    v-if="
+                        can('withdrawals.initiate') &&
+                        (consignment.status === 'active' ||
+                            consignment.status === 'on_hold')
+                    "
+                    as-child
+                    variant="outline"
+                    class="min-h-10"
+                >
+                    <Link
+                        :href="
+                            createWithdrawal({
+                                query: { consignment_id: consignment.id },
+                            })
+                        "
+                    >
+                        <Undo2 class="mr-1.5 size-4" aria-hidden="true" />
+                        Initiate Withdrawal
+                    </Link>
                 </Button>
                 <Button
                     v-if="canAmend"

@@ -67,7 +67,7 @@ class CreateSaleAction
 
         return DB::transaction(function () use ($data, $actor, $listPrice, $discount, $finalPrice, $initialPayment, $isInstallment): Sale {
             /** @var Vehicle $vehicle */
-            $vehicle = Vehicle::query()->with('activeConsignment')->lockForUpdate()->findOrFail($data['vehicle_id']);
+            $vehicle = Vehicle::query()->with('activeConsignment')->lockForUpdate()->findOrFail((int) $data['vehicle_id']);
 
             if (in_array($vehicle->status, [VehicleStatus::Sold, VehicleStatus::Withdrawn, VehicleStatus::Archived], true)) {
                 throw ValidationException::withMessages([
@@ -75,12 +75,11 @@ class CreateSaleAction
                 ]);
             }
 
-            /** @var Reservation|null $reservation */
             $reservation = null;
             $carriedDeposit = Money::zero();
 
             if (! empty($data['reservation_id'])) {
-                $reservation = Reservation::query()->lockForUpdate()->findOrFail($data['reservation_id']);
+                $reservation = Reservation::query()->lockForUpdate()->findOrFail((int) $data['reservation_id']);
                 if ($reservation->status !== ReservationStatus::Active || $reservation->vehicle_id !== $vehicle->id) {
                     throw ValidationException::withMessages([
                         'reservation_id' => 'Selected reservation is not active for this vehicle.',

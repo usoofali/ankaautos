@@ -194,7 +194,12 @@ function updateQuery(overrides: Record<string, string | number>): void {
                     />
                 </td>
                 <td class="px-4 py-3.5 text-right">
-                    <Button as-child variant="outline" size="sm" class="min-h-9">
+                    <Button
+                        as-child
+                        variant="outline"
+                        size="sm"
+                        class="min-h-9"
+                    >
                         <Link :href="show(row.id)">
                             <Eye class="mr-1.5 size-3.5" aria-hidden="true" />
                             View

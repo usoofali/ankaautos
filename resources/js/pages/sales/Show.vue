@@ -135,7 +135,10 @@ defineOptions({
 const { formatMoney, formatDate, formatDateTime } = useFormatting();
 
 function uuid(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    if (
+        typeof crypto !== 'undefined' &&
+        typeof crypto.randomUUID === 'function'
+    ) {
         return crypto.randomUUID();
     }
     return `pay-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -166,8 +169,16 @@ const handoverForm = useForm({
     early_handover_reason: '',
     items: [
         { item_name: 'Primary & Spare Keys', is_included: true, remarks: '' },
-        { item_name: 'Original Vehicle Papers / Customs Docs', is_included: true, remarks: '' },
-        { item_name: 'Spare Tyre, Jack & Wheel Spanner', is_included: true, remarks: '' },
+        {
+            item_name: 'Original Vehicle Papers / Customs Docs',
+            is_included: true,
+            remarks: '',
+        },
+        {
+            item_name: 'Spare Tyre, Jack & Wheel Spanner',
+            is_included: true,
+            remarks: '',
+        },
     ],
 });
 
@@ -291,7 +302,9 @@ function submitCancel(): void {
 
                     <dl class="grid gap-4 text-sm sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs text-muted-foreground">Vehicle</dt>
+                            <dt class="text-xs text-muted-foreground">
+                                Vehicle
+                            </dt>
                             <dd class="mt-0.5 font-medium">
                                 <Link
                                     :href="showVehicle(sale.vehicle_id)"
@@ -304,7 +317,9 @@ function submitCancel(): void {
                             </dd>
                         </div>
                         <div>
-                            <dt class="text-xs text-muted-foreground">Customer</dt>
+                            <dt class="text-xs text-muted-foreground">
+                                Customer
+                            </dt>
                             <dd class="mt-0.5 font-medium">
                                 {{ sale.customer_name }}
                                 <span
@@ -327,7 +342,9 @@ function submitCancel(): void {
                             <dt class="text-xs text-muted-foreground">
                                 Sales Officer
                             </dt>
-                            <dd class="mt-0.5">{{ sale.sales_officer_name }}</dd>
+                            <dd class="mt-0.5">
+                                {{ sale.sales_officer_name }}
+                            </dd>
                         </div>
                         <div v-if="sale.reservation_reference">
                             <dt class="text-xs text-muted-foreground">
@@ -335,10 +352,15 @@ function submitCancel(): void {
                             </dt>
                             <dd class="mt-0.5 font-mono">
                                 {{ sale.reservation_reference }} (Deposit
-                                {{ formatMoney(sale.reservation_deposit ?? 0) }})
+                                {{
+                                    formatMoney(sale.reservation_deposit ?? 0)
+                                }})
                             </dd>
                         </div>
-                        <div v-if="sale.installment_terms" class="sm:col-span-2">
+                        <div
+                            v-if="sale.installment_terms"
+                            class="sm:col-span-2"
+                        >
                             <dt class="text-xs text-muted-foreground">
                                 Installment Terms
                             </dt>
@@ -373,35 +395,52 @@ function submitCancel(): void {
                     <div v-else class="overflow-x-auto">
                         <table class="w-full text-sm">
                             <thead>
-                                <tr class="border-b text-left text-xs text-muted-foreground">
+                                <tr
+                                    class="border-b text-left text-xs text-muted-foreground"
+                                >
                                     <th class="pb-2 font-medium">Receipt</th>
-                                    <th class="pb-2 font-medium">Type & Method</th>
+                                    <th class="pb-2 font-medium">
+                                        Type & Method
+                                    </th>
                                     <th class="pb-2 font-medium">Date</th>
-                                    <th class="pb-2 text-right font-medium">Amount</th>
-                                    <th class="pb-2 text-right font-medium">PDF</th>
+                                    <th class="pb-2 text-right font-medium">
+                                        Amount
+                                    </th>
+                                    <th class="pb-2 text-right font-medium">
+                                        PDF
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
                                 <tr v-for="p in sale.payments" :key="p.id">
-                                    <td class="py-3 font-mono text-xs font-semibold">
+                                    <td
+                                        class="py-3 font-mono text-xs font-semibold"
+                                    >
                                         {{ p.reference_number }}
                                     </td>
                                     <td class="py-3">
                                         <div class="font-medium">
                                             {{ p.payment_type_label }}
                                         </div>
-                                        <div class="text-xs text-muted-foreground">
+                                        <div
+                                            class="text-xs text-muted-foreground"
+                                        >
                                             {{ p.payment_method }} ·
                                             {{ p.financial_account }}
                                             <span v-if="p.external_reference">
-                                                · Ref: {{ p.external_reference }}
+                                                · Ref:
+                                                {{ p.external_reference }}
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="py-3 text-xs text-muted-foreground">
+                                    <td
+                                        class="py-3 text-xs text-muted-foreground"
+                                    >
                                         {{ formatDate(p.paid_at) }}
                                     </td>
-                                    <td class="py-3 text-right font-semibold tabular-nums">
+                                    <td
+                                        class="py-3 text-right font-semibold tabular-nums"
+                                    >
                                         {{ formatMoney(p.amount) }}
                                     </td>
                                     <td class="py-3 text-right">
@@ -432,7 +471,9 @@ function submitCancel(): void {
                     v-if="sale.handover"
                     title="Vehicle Handover Record"
                 >
-                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3">
+                    <div
+                        class="flex flex-wrap items-center justify-between gap-2 pb-3"
+                    >
                         <div class="font-mono text-sm font-semibold">
                             {{ sale.handover.reference_number }}
                         </div>
@@ -445,7 +486,9 @@ function submitCancel(): void {
                     </div>
                     <dl class="grid gap-3 text-sm sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs text-muted-foreground">Recipient</dt>
+                            <dt class="text-xs text-muted-foreground">
+                                Recipient
+                            </dt>
                             <dd class="font-medium">
                                 {{ sale.handover.recipient_name }} ({{
                                     sale.handover.recipient_phone
@@ -457,12 +500,19 @@ function submitCancel(): void {
                                 Handed Over On
                             </dt>
                             <dd>
-                                {{ formatDateTime(sale.handover.handed_over_at) }}
+                                {{
+                                    formatDateTime(sale.handover.handed_over_at)
+                                }}
                                 by {{ sale.handover.officer_name }}
                             </dd>
                         </div>
-                        <div v-if="sale.early_handover_reason" class="sm:col-span-2">
-                            <dt class="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                        <div
+                            v-if="sale.early_handover_reason"
+                            class="sm:col-span-2"
+                        >
+                            <dt
+                                class="text-xs font-semibold text-amber-700 dark:text-amber-400"
+                            >
                                 Early Handover Exception Reason
                             </dt>
                             <dd>{{ sale.early_handover_reason }}</dd>
@@ -472,7 +522,9 @@ function submitCancel(): void {
                         v-if="sale.handover.items.length > 0"
                         class="mt-4 border-t pt-3"
                     >
-                        <p class="mb-2 text-xs font-semibold text-muted-foreground uppercase">
+                        <p
+                            class="mb-2 text-xs font-semibold text-muted-foreground uppercase"
+                        >
                             Checklist Items
                         </p>
                         <ul class="space-y-1.5 text-sm">
@@ -484,7 +536,9 @@ function submitCancel(): void {
                                 <span>{{ item.item_name }}</span>
                                 <StatusBadge
                                     :label="
-                                        item.is_included ? 'Included' : 'Missing'
+                                        item.is_included
+                                            ? 'Included'
+                                            : 'Missing'
                                     "
                                     :variant="
                                         item.is_included ? 'success' : 'warning'
@@ -588,8 +642,14 @@ function submitCancel(): void {
                                 }}
                             </span>
                         </div>
-                        <Button as-child variant="outline" class="mt-2 min-h-10 w-full">
-                            <Link :href="showSettlement(sale.owner_settlement.id)">
+                        <Button
+                            as-child
+                            variant="outline"
+                            class="mt-2 min-h-10 w-full"
+                        >
+                            <Link
+                                :href="showSettlement(sale.owner_settlement.id)"
+                            >
                                 <Handshake class="mr-1.5 size-4" />
                                 Open Owner Settlement
                             </Link>
@@ -684,7 +744,10 @@ function submitCancel(): void {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" :disabled="paymentForm.processing">
+                        <Button
+                            type="submit"
+                            :disabled="paymentForm.processing"
+                        >
                             <Spinner
                                 v-if="paymentForm.processing"
                                 class="mr-2 size-4"
@@ -710,12 +773,18 @@ function submitCancel(): void {
                         v-if="!sale.is_fully_paid"
                         class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200"
                     >
-                        <strong>Balance Unpaid ({{ formatMoney(sale.balance_due) }}):</strong>
+                        <strong
+                            >Balance Unpaid ({{
+                                formatMoney(sale.balance_due)
+                            }}):</strong
+                        >
                         <span v-if="canApproveEarlyHandover">
-                            You have Manager authority to approve an early release. Provide a mandatory justification below.
+                            You have Manager authority to approve an early
+                            release. Provide a mandatory justification below.
                         </span>
                         <span v-else>
-                            Full payment is required before handover unless a Manager approves an early-release exception.
+                            Full payment is required before handover unless a
+                            Manager approves an early-release exception.
                         </span>
                     </div>
 
@@ -759,7 +828,9 @@ function submitCancel(): void {
                             />
                         </div>
                         <div
-                            v-if="!sale.is_fully_paid && canApproveEarlyHandover"
+                            v-if="
+                                !sale.is_fully_paid && canApproveEarlyHandover
+                            "
                             class="grid gap-1.5 sm:col-span-2"
                         >
                             <Label for="early_reason">
@@ -853,10 +924,10 @@ function submitCancel(): void {
                     <DialogTitle>Cancel Vehicle Sale</DialogTitle>
                     <DialogDescription>
                         Cancelling logs a customer refund of
-                        <strong>{{ formatMoney(sale.amount_paid) }}</strong>,
-                        returns the vehicle to Available, and voids any unpaid
-                        owner settlement. Blocked if the consignment owner has
-                        already been paid.
+                        <strong>{{ formatMoney(sale.amount_paid) }}</strong
+                        >, returns the vehicle to Available, and voids any
+                        unpaid owner settlement. Blocked if the consignment
+                        owner has already been paid.
                     </DialogDescription>
                 </DialogHeader>
                 <form class="space-y-4" @submit.prevent="submitCancel">

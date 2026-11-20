@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Eye, Plus } from '@lucide/vue';
-import { ref } from 'vue';
 import DataTableCard, {
     type DataTableColumn,
 } from '@/components/anka/DataTableCard.vue';
@@ -14,7 +13,7 @@ import { useFormatting } from '@/composables/useFormatting';
 import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
 import { create, index, show } from '@/routes/withdrawals';
-import type { PaginatedData } from '@/types';
+import type { Paginated } from '@/types';
 
 type WithdrawalRow = {
     id: number;
@@ -32,7 +31,7 @@ type WithdrawalRow = {
 };
 
 const props = defineProps<{
-    withdrawals: PaginatedData<WithdrawalRow>;
+    withdrawals: Paginated<WithdrawalRow>;
     statusOptions: Array<{ value: string; label: string }>;
     filters: {
         search: string;
@@ -53,11 +52,6 @@ defineOptions({
 const { can } = usePermissions();
 const { formatMoney, formatDate } = useFormatting();
 
-const search = ref(props.filters.search);
-const statusFilter = ref(props.filters.status);
-const perPage = ref(props.filters.per_page);
-const loading = ref(false);
-
 const columns: DataTableColumn[] = [
     { key: 'reference_number', label: 'Reference' },
     { key: 'vehicle_title', label: 'Vehicle & Owner' },
@@ -66,26 +60,21 @@ const columns: DataTableColumn[] = [
     { key: 'balance_due', label: 'Balance', align: 'right' },
     { key: 'status', label: 'Status' },
     { key: 'requested_at', label: 'Requested' },
+    { key: 'actions', label: 'Actions', align: 'right' },
 ];
 
-function applyFilters(page = 1): void {
-    loading.value = true;
+function updateQuery(
+    overrides: Record<string, string | number | undefined>,
+): void {
     router.get(
         index.url(),
         {
-            search: search.value || undefined,
-            status: statusFilter.value || undefined,
-            per_page: perPage.value,
-            page,
+            search: props.filters.search || undefined,
+            status: props.filters.status || undefined,
+            per_page: props.filters.per_page,
+            ...overrides,
         },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-            onFinish: () => {
-                loading.value = false;
-            },
-        },
+        { preserveState: true, preserveScroll: true, replace: true },
     );
 }
 </script>
@@ -98,12 +87,8 @@ function applyFilters(page = 1): void {
             title="Consignment Withdrawals"
             description="Process owner withdrawal requests with 100% clearance of withdrawal charges and owner-deductible expenses prior to release."
         >
-            <template #actions>
-                <Button
-                    v-if="can('withdrawals.initiate')"
-                    as-child
-                    class="min-h-10"
-                >
+            <template v-if="can('withdrawals.initiate')" #actions>
+                <Button as-child class="min-h-10 w-full sm:w-auto">
                     <Link :href="create()">
                         <Plus class="mr-1.5 size-4" aria-hidden="true" />
                         Initiate Withdrawal
@@ -113,36 +98,32 @@ function applyFilters(page = 1): void {
         </PageHeader>
 
         <DataTableCard
-            title="Withdrawal Requests"
-            description="Strict cash-first release: balance due must reach ₦0.00 before handover."
+            caption="Consignment withdrawal requests"
             :columns="columns"
-            :rows="withdrawals.data"
-            :pagination="withdrawals"
-            :search="search"
+            :rows="withdrawals"
+            :search="filters.search"
             search-placeholder="Search withdrawal ref, owner, vehicle..."
-            :per-page="perPage"
-            :loading="loading"
+            :per-page="filters.per_page"
             empty-title="No consignment withdrawals"
             empty-description="Initiate a withdrawal whenever an owner requests to retrieve an unsold consigned vehicle."
             @update:search="
-                (v) => {
-                    search = v;
-                    applyFilters(1);
-                }
+                (v) => updateQuery({ search: v || undefined, page: 1 })
             "
-            @update:per-page="
-                (v) => {
-                    perPage = v;
-                    applyFilters(1);
-                }
-            "
+            @update:per-page="(p) => updateQuery({ per_page: p, page: 1 })"
         >
             <template #filters>
                 <select
-                    v-model="statusFilter"
+                    :value="filters.status"
                     aria-label="Filter by withdrawal status"
-                    class="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                    @change="applyFilters(1)"
+                    class="min-h-10 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+                    @change="
+                        updateQuery({
+                            status:
+                                ($event.target as HTMLSelectElement).value ||
+                                undefined,
+                            page: 1,
+                        })
+                    "
                 >
                     <option value="">All Statuses</option>
                     <option
@@ -155,40 +136,91 @@ function applyFilters(page = 1): void {
                 </select>
             </template>
 
-            <template #cell-reference_number="{ row }">
-                <Link
-                    :href="show(row.id)"
-                    class="font-mono text-sm font-semibold text-primary hover:underline"
+            <template #mobile-card="{ row }">
+                <div class="space-y-2.5">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <Link
+                                :href="show(row.id)"
+                                class="font-mono text-sm font-semibold text-primary hover:underline"
+                            >
+                                {{ row.reference_number }}
+                            </Link>
+                            <p class="mt-0.5 text-sm font-medium">
+                                {{ row.vehicle_title }}
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ row.owner_name }}
+                            </p>
+                        </div>
+                        <StatusBadge
+                            :label="row.status_label"
+                            :variant="row.status_variant"
+                        />
+                    </div>
+                    <div
+                        class="grid grid-cols-3 gap-2 border-t pt-2 text-xs tabular-nums"
+                    >
+                        <div>
+                            <span class="text-muted-foreground">Due</span>
+                            <p class="font-semibold">
+                                {{ formatMoney(row.total_due) }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-muted-foreground">Paid</span>
+                            <p
+                                class="font-semibold text-emerald-700 dark:text-emerald-400"
+                            >
+                                {{ formatMoney(row.amount_paid) }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="text-muted-foreground">Balance</span>
+                            <p class="font-semibold">
+                                {{ formatMoney(row.balance_due) }}
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        as-child
+                        variant="outline"
+                        size="sm"
+                        class="min-h-9 w-full"
+                    >
+                        <Link :href="show(row.id)">Open Withdrawal</Link>
+                    </Button>
+                </div>
+            </template>
+
+            <template #row="{ row }">
+                <td class="px-4 py-3.5">
+                    <Link
+                        :href="show(row.id)"
+                        class="font-mono text-sm font-semibold text-primary hover:underline"
+                    >
+                        {{ row.reference_number }}
+                    </Link>
+                    <div class="text-xs text-muted-foreground">
+                        {{ row.consignment_reference }}
+                    </div>
+                </td>
+                <td class="px-4 py-3.5">
+                    <div class="font-medium">{{ row.vehicle_title }}</div>
+                    <div class="text-xs text-muted-foreground">
+                        Owner: {{ row.owner_name }}
+                    </div>
+                </td>
+                <td class="px-4 py-3.5 text-right font-medium tabular-nums">
+                    {{ formatMoney(row.total_due) }}
+                </td>
+                <td
+                    class="px-4 py-3.5 text-right text-emerald-700 tabular-nums dark:text-emerald-400"
                 >
-                    {{ row.reference_number }}
-                </Link>
-                <div class="text-xs text-muted-foreground">
-                    {{ row.consignment_reference }}
-                </div>
-            </template>
-
-            <template #cell-vehicle_title="{ row }">
-                <div class="font-medium">{{ row.vehicle_title }}</div>
-                <div class="text-xs text-muted-foreground">
-                    Owner: {{ row.owner_name }}
-                </div>
-            </template>
-
-            <template #cell-total_due="{ row }">
-                <span class="font-medium tabular-nums">{{
-                    formatMoney(row.total_due)
-                }}</span>
-            </template>
-
-            <template #cell-amount_paid="{ row }">
-                <span class="text-emerald-700 tabular-nums dark:text-emerald-400">
                     {{ formatMoney(row.amount_paid) }}
-                </span>
-            </template>
-
-            <template #cell-balance_due="{ row }">
-                <span
-                    class="font-semibold tabular-nums"
+                </td>
+                <td
+                    class="px-4 py-3.5 text-right font-semibold tabular-nums"
                     :class="
                         Number(row.balance_due) > 0
                             ? 'text-destructive'
@@ -196,72 +228,29 @@ function applyFilters(page = 1): void {
                     "
                 >
                     {{ formatMoney(row.balance_due) }}
-                </span>
-            </template>
-
-            <template #cell-status="{ row }">
-                <StatusBadge
-                    :label="row.status_label"
-                    :variant="row.status_variant"
-                />
-            </template>
-
-            <template #cell-requested_at="{ row }">
-                <span class="text-xs text-muted-foreground">
-                    {{ formatDate(row.requested_at) }}
-                </span>
-            </template>
-
-            <template #actions="{ row }">
-                <Button as-child variant="outline" size="sm" class="min-h-9">
-                    <Link :href="show(row.id)">
-                        <Eye class="mr-1 size-3.5" aria-hidden="true" />
-                        Open
-                    </Link>
-                </Button>
-            </template>
-
-            <template #mobile-card="{ row }">
-                <div class="flex items-start justify-between gap-2">
-                    <div>
-                        <Link
-                            :href="show(row.id)"
-                            class="font-mono text-sm font-semibold text-primary hover:underline"
-                        >
-                            {{ row.reference_number }}
-                        </Link>
-                        <p class="mt-0.5 text-sm font-medium">
-                            {{ row.vehicle_title }}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                            {{ row.owner_name }}
-                        </p>
-                    </div>
+                </td>
+                <td class="px-4 py-3.5">
                     <StatusBadge
                         :label="row.status_label"
                         :variant="row.status_variant"
                     />
-                </div>
-                <div class="mt-3 grid grid-cols-3 gap-2 border-t pt-2.5 text-xs">
-                    <div>
-                        <span class="text-muted-foreground">Due</span>
-                        <p class="font-semibold tabular-nums">
-                            {{ formatMoney(row.total_due) }}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-muted-foreground">Paid</span>
-                        <p class="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400">
-                            {{ formatMoney(row.amount_paid) }}
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-muted-foreground">Balance</span>
-                        <p class="font-semibold tabular-nums">
-                            {{ formatMoney(row.balance_due) }}
-                        </p>
-                    </div>
-                </div>
+                </td>
+                <td class="px-4 py-3.5 text-xs text-muted-foreground">
+                    {{ formatDate(row.requested_at) }}
+                </td>
+                <td class="px-4 py-3.5 text-right">
+                    <Button
+                        as-child
+                        variant="outline"
+                        size="sm"
+                        class="min-h-9"
+                    >
+                        <Link :href="show(row.id)">
+                            <Eye class="mr-1 size-3.5" aria-hidden="true" />
+                            Open
+                        </Link>
+                    </Button>
+                </td>
             </template>
         </DataTableCard>
     </div>

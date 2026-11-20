@@ -69,15 +69,22 @@ defineOptions({
 const { formatMoney } = useFormatting();
 
 function generateIdempotencyKey(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    if (
+        typeof crypto !== 'undefined' &&
+        typeof crypto.randomUUID === 'function'
+    ) {
         return crypto.randomUUID();
     }
     return `sale-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 const form = useForm({
-    vehicle_id: props.preselectedReservation?.vehicle_id ?? (props.vehicles[0]?.id ?? ''),
-    customer_id: props.preselectedReservation?.customer_id ?? (props.customers[0]?.id ?? ''),
+    vehicle_id:
+        props.preselectedReservation?.vehicle_id ?? props.vehicles[0]?.id ?? '',
+    customer_id:
+        props.preselectedReservation?.customer_id ??
+        props.customers[0]?.id ??
+        '',
     reservation_id: props.preselectedReservation?.id ?? null,
     list_price:
         props.preselectedReservation?.agreed_price ??
@@ -162,13 +169,17 @@ function submit(): void {
         ...data,
         discount_amount: props.canApproveDiscount ? data.discount_amount : '0',
         initial_payment_amount:
-            data.initial_payment_amount === '' ? null : data.initial_payment_amount,
+            data.initial_payment_amount === ''
+                ? null
+                : data.initial_payment_amount,
         custom_commission_amount:
             data.custom_commission_amount === ''
                 ? null
                 : data.custom_commission_amount,
         charges: data.charges.filter(
-            (c) => Number(c.amount) > 0 && (c.charge_category_id || c.custom_label),
+            (c) =>
+                Number(c.amount) > 0 &&
+                (c.charge_category_id || c.custom_label),
         ),
     })).post(store.url());
 }
@@ -202,7 +213,8 @@ function submit(): void {
                 class="rounded-xl border border-primary/25 bg-primary/5 p-4 text-sm"
             >
                 <p class="font-semibold text-primary">
-                    Reservation Conversion: {{ preselectedReservation.reference_number }}
+                    Reservation Conversion:
+                    {{ preselectedReservation.reference_number }}
                 </p>
                 <p class="mt-1 text-muted-foreground">
                     Customer deposit of
@@ -254,10 +266,13 @@ function submit(): void {
                                         :key="c.id"
                                         :value="c.id"
                                     >
-                                        {{ c.name }} ({{ c.phone }} · {{ c.reference_number }})
+                                        {{ c.name }} ({{ c.phone }} ·
+                                        {{ c.reference_number }})
                                     </option>
                                 </select>
-                                <InputError :message="form.errors.customer_id" />
+                                <InputError
+                                    :message="form.errors.customer_id"
+                                />
                             </div>
                         </div>
                     </FormSectionCard>
@@ -268,7 +283,9 @@ function submit(): void {
                     >
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div class="grid gap-1.5">
-                                <Label for="list_price">Agreed List Price (₦)</Label>
+                                <Label for="list_price"
+                                    >Agreed List Price (₦)</Label
+                                >
                                 <Input
                                     id="list_price"
                                     v-model="form.list_price"
@@ -281,10 +298,7 @@ function submit(): void {
                                 <InputError :message="form.errors.list_price" />
                             </div>
 
-                            <div
-                                v-if="canApproveDiscount"
-                                class="grid gap-1.5"
-                            >
+                            <div v-if="canApproveDiscount" class="grid gap-1.5">
                                 <Label for="discount_amount">
                                     Manager Discount (₦)
                                 </Label>
@@ -325,7 +339,8 @@ function submit(): void {
 
                             <div
                                 v-if="
-                                    selectedVehicle?.commission_type === 'custom'
+                                    selectedVehicle?.commission_type ===
+                                    'custom'
                                 "
                                 class="grid gap-1.5 sm:col-span-2"
                             >
@@ -348,7 +363,9 @@ function submit(): void {
                                 />
                             </div>
 
-                            <div class="flex items-center gap-2.5 sm:col-span-2">
+                            <div
+                                class="flex items-center gap-2.5 sm:col-span-2"
+                            >
                                 <input
                                     id="is_installment"
                                     v-model="form.is_installment"
@@ -359,7 +376,9 @@ function submit(): void {
                                     for="is_installment"
                                     class="cursor-pointer font-normal"
                                 >
-                                    Approve as an installment sale (allows partial payment while tracking customer receivable)
+                                    Approve as an installment sale (allows
+                                    partial payment while tracking customer
+                                    receivable)
                                 </Label>
                             </div>
 
@@ -489,7 +508,9 @@ function submit(): void {
                                 class="grid gap-3 rounded-lg border p-3 sm:grid-cols-12"
                             >
                                 <div class="sm:col-span-4">
-                                    <Label class="text-xs">Charge Category</Label>
+                                    <Label class="text-xs"
+                                        >Charge Category</Label
+                                    >
                                     <select
                                         v-model="charge.charge_category_id"
                                         class="mt-1 h-10 w-full rounded-md border border-input bg-background px-2.5 text-sm"
@@ -523,7 +544,9 @@ function submit(): void {
                                         class="mt-1 min-h-10"
                                     />
                                 </div>
-                                <div class="flex items-end justify-end sm:col-span-1">
+                                <div
+                                    class="flex items-end justify-end sm:col-span-1"
+                                >
                                     <Button
                                         type="button"
                                         variant="ghost"
@@ -531,7 +554,9 @@ function submit(): void {
                                         aria-label="Remove charge"
                                         @click="removeChargeRow(idx)"
                                     >
-                                        <Trash2 class="size-4 text-destructive" />
+                                        <Trash2
+                                            class="size-4 text-destructive"
+                                        />
                                     </Button>
                                 </div>
                             </div>
@@ -572,7 +597,9 @@ function submit(): void {
                     >
                         <dl class="space-y-3 text-sm">
                             <div class="flex justify-between">
-                                <dt class="text-muted-foreground">List Price</dt>
+                                <dt class="text-muted-foreground">
+                                    List Price
+                                </dt>
                                 <dd class="font-medium tabular-nums">
                                     {{ formatMoney(form.list_price || 0) }}
                                 </dd>

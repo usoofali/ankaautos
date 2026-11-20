@@ -138,7 +138,11 @@ const handoverForm = useForm({
     notes: '',
     items: [
         { item_name: 'Vehicle Keys Returned', is_included: true, remarks: '' },
-        { item_name: 'Original Papers Returned', is_included: true, remarks: '' },
+        {
+            item_name: 'Original Papers Returned',
+            is_included: true,
+            remarks: '',
+        },
     ],
 });
 
@@ -283,7 +287,9 @@ function submitHandover(): void {
                     </div>
                     <dl class="grid gap-3 text-sm sm:grid-cols-2">
                         <div>
-                            <dt class="text-xs text-muted-foreground">Vehicle</dt>
+                            <dt class="text-xs text-muted-foreground">
+                                Vehicle
+                            </dt>
                             <dd class="font-medium">
                                 {{ withdrawal.vehicle_title }} ({{
                                     withdrawal.vehicle_reference
@@ -303,7 +309,9 @@ function submitHandover(): void {
                             </dd>
                         </div>
                         <div class="sm:col-span-2">
-                            <dt class="text-xs text-muted-foreground">Reason</dt>
+                            <dt class="text-xs text-muted-foreground">
+                                Reason
+                            </dt>
                             <dd>{{ withdrawal.reason }}</dd>
                         </div>
                     </dl>
@@ -317,7 +325,8 @@ function submitHandover(): void {
                         v-if="withdrawal.owner_expenses.length === 0"
                         class="text-sm text-muted-foreground"
                     >
-                        No unsettled owner-deductible expenses on this consignment.
+                        No unsettled owner-deductible expenses on this
+                        consignment.
                     </p>
                     <ul v-else class="divide-y text-sm">
                         <li
@@ -326,7 +335,9 @@ function submitHandover(): void {
                             class="flex items-center justify-between py-2.5"
                         >
                             <div>
-                                <span class="font-mono text-xs text-muted-foreground">
+                                <span
+                                    class="font-mono text-xs text-muted-foreground"
+                                >
                                     {{ e.reference_number }}
                                 </span>
                                 <p class="font-medium">{{ e.description }}</p>
@@ -390,7 +401,9 @@ function submitHandover(): void {
                                     {{ p.financial_account }}
                                 </p>
                             </div>
-                            <span class="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400">
+                            <span
+                                class="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400"
+                            >
                                 {{ formatMoney(p.amount) }}
                             </span>
                         </li>
@@ -402,9 +415,13 @@ function submitHandover(): void {
                 <FormSectionCard title="Clearance Totals">
                     <dl class="space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <dt class="text-muted-foreground">Owner Expenses</dt>
+                            <dt class="text-muted-foreground">
+                                Owner Expenses
+                            </dt>
                             <dd class="tabular-nums">
-                                {{ formatMoney(withdrawal.total_owner_expenses) }}
+                                {{
+                                    formatMoney(withdrawal.total_owner_expenses)
+                                }}
                             </dd>
                         </div>
                         <div class="flex justify-between">
@@ -455,7 +472,9 @@ function submitHandover(): void {
                     </p>
                     <p class="mt-1 text-sm">
                         Released to
-                        <strong>{{ withdrawal.handover.recipient_name }}</strong>
+                        <strong>{{
+                            withdrawal.handover.recipient_name
+                        }}</strong>
                     </p>
                     <p class="text-xs text-muted-foreground">
                         {{ formatDateTime(withdrawal.handover.handed_over_at) }}
@@ -491,7 +510,10 @@ function submitHandover(): void {
                     </div>
                     <div class="grid gap-1.5">
                         <Label for="ch_label">Custom Label</Label>
-                        <Input id="ch_label" v-model="chargeForm.custom_label" />
+                        <Input
+                            id="ch_label"
+                            v-model="chargeForm.custom_label"
+                        />
                     </div>
                     <div class="grid gap-1.5">
                         <Label for="ch_amount">Amount (₦)</Label>
@@ -600,7 +622,10 @@ function submitHandover(): void {
                         >
                             Cancel
                         </Button>
-                        <Button type="submit" :disabled="paymentForm.processing">
+                        <Button
+                            type="submit"
+                            :disabled="paymentForm.processing"
+                        >
                             <Spinner
                                 v-if="paymentForm.processing"
                                 class="mr-2 size-4"
@@ -616,9 +641,12 @@ function submitHandover(): void {
         <Dialog v-model:open="handoverOpen">
             <DialogContent class="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle>Complete Vehicle Withdrawal Handover</DialogTitle>
+                    <DialogTitle
+                        >Complete Vehicle Withdrawal Handover</DialogTitle
+                    >
                     <DialogDescription>
-                        Marks the consignment and vehicle as Withdrawn and locks all settled owner expenses.
+                        Marks the consignment and vehicle as Withdrawn and locks
+                        all settled owner expenses.
                     </DialogDescription>
                 </DialogHeader>
                 <form class="space-y-4" @submit.prevent="submitHandover">

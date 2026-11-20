@@ -135,9 +135,7 @@ function submit(): void {
                     </div>
 
                     <div class="space-y-2">
-                        <Label for="res_deposit"
-                            >Mandatory Deposit (₦) *</Label
-                        >
+                        <Label for="res_deposit">Mandatory Deposit (₦) *</Label>
                         <Input
                             id="res_deposit"
                             v-model="form.deposit_amount"

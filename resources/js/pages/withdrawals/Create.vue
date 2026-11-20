@@ -48,7 +48,7 @@ const { formatMoney } = useFormatting();
 
 const form = useForm({
     consignment_id:
-        props.preselectedConsignmentId ?? (props.consignments[0]?.id ?? ''),
+        props.preselectedConsignmentId ?? props.consignments[0]?.id ?? '',
     reason: '',
     charges: [] as ChargeRow[],
 });
@@ -93,7 +93,9 @@ function submit(): void {
     form.transform((data) => ({
         ...data,
         charges: data.charges.filter(
-            (c) => Number(c.amount) > 0 && (c.charge_category_id || c.custom_label),
+            (c) =>
+                Number(c.amount) > 0 &&
+                (c.charge_category_id || c.custom_label),
         ),
     })).post(store.url());
 }
@@ -203,7 +205,9 @@ function submit(): void {
                                     class="mt-1 min-h-10"
                                 />
                             </div>
-                            <div class="flex items-end justify-end sm:col-span-1">
+                            <div
+                                class="flex items-end justify-end sm:col-span-1"
+                            >
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -271,10 +275,7 @@ function submit(): void {
                         class="min-h-11 w-full"
                         :disabled="form.processing || consignments.length === 0"
                     >
-                        <Spinner
-                            v-if="form.processing"
-                            class="mr-2 size-4"
-                        />
+                        <Spinner v-if="form.processing" class="mr-2 size-4" />
                         Initiate Withdrawal
                     </Button>
                     <Button as-child variant="outline" class="min-h-10 w-full">

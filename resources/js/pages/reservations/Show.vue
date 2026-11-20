@@ -238,9 +238,7 @@ function submitCancel(): void {
                         </div>
                     </template>
                     <div class="space-y-1.5">
-                        <Label for="cancel_reason"
-                            >Cancellation Reason *</Label
-                        >
+                        <Label for="cancel_reason">Cancellation Reason *</Label>
                         <textarea
                             id="cancel_reason"
                             v-model="cancelForm.cancellation_reason"

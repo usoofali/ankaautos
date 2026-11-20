@@ -163,7 +163,9 @@ function submitInquiry(): void {
                                     :label="s.status_label"
                                     :variant="s.status_variant"
                                 />
-                                <p class="mt-1 text-xs font-semibold tabular-nums">
+                                <p
+                                    class="mt-1 text-xs font-semibold tabular-nums"
+                                >
                                     {{ formatMoney(s.final_price) }}
                                 </p>
                             </div>
@@ -223,7 +225,9 @@ function submitInquiry(): void {
                             :key="inq.id"
                             class="space-y-1 py-3 text-sm"
                         >
-                            <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div
+                                class="flex flex-wrap items-center justify-between gap-2"
+                            >
                                 <span class="font-semibold">{{
                                     inq.vehicle_title
                                 }}</span>
@@ -235,10 +239,12 @@ function submitInquiry(): void {
                             <p class="text-xs text-muted-foreground">
                                 Channel: {{ inq.channel }}
                                 <span v-if="inq.offered_price">
-                                    · Offer: {{ formatMoney(inq.offered_price) }}
+                                    · Offer:
+                                    {{ formatMoney(inq.offered_price) }}
                                 </span>
                                 <span v-if="inq.inspection_date">
-                                    · Inspected {{ formatDate(inq.inspection_date) }}
+                                    · Inspected
+                                    {{ formatDate(inq.inspection_date) }}
                                 </span>
                             </p>
                             <p v-if="inq.inspection_notes" class="text-xs">
@@ -343,10 +349,7 @@ function submitInquiry(): void {
                         class="min-h-10 w-full"
                         :disabled="inquiryForm.processing"
                     >
-                        <Spinner
-                            v-if="inquiryForm.processing"
-                            class="mr-1.5"
-                        />
+                        <Spinner v-if="inquiryForm.processing" class="mr-1.5" />
                         <MessageSquarePlus
                             v-else
                             class="mr-1.5 size-4"
