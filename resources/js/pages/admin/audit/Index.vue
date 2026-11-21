@@ -95,6 +95,12 @@ function updateQuery(overrides: Record<string, string | number>): void {
         { preserveState: true, preserveScroll: true, replace: true },
     );
 }
+function formatLogValues(
+    values: Record<string, unknown> | null | undefined,
+    emptyText: string,
+): string {
+    return values ? JSON.stringify(values, null, 2) : emptyText;
+}
 </script>
 
 <template>
@@ -272,10 +278,14 @@ function updateQuery(overrides: Record<string, string | number>): void {
             :open="inspectedLog !== null"
             @update:open="(open) => !open && (inspectedLog = null)"
         >
-            <DialogContent class="max-h-[85svh] overflow-y-auto sm:max-w-2xl">
-                <DialogHeader>
+            <DialogContent
+                class="max-h-[85svh] grid-cols-1 overflow-y-auto overscroll-contain sm:max-w-3xl"
+            >
+                <DialogHeader class="min-w-0 pr-8">
                     <DialogTitle>Audit Change Details</DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription
+                        class="[overflow-wrap:anywhere] break-words"
+                    >
                         {{ inspectedLog?.event }} on
                         {{ inspectedLog?.auditable_type }} #{{
                             inspectedLog?.auditable_id
@@ -285,47 +295,42 @@ function updateQuery(overrides: Record<string, string | number>): void {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div v-if="inspectedLog" class="space-y-4 text-xs">
+                <div v-if="inspectedLog" class="min-w-0 space-y-4 text-xs">
                     <div
                         v-if="inspectedLog.reason"
-                        class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
+                        class="rounded-lg border border-amber-200 bg-amber-50 p-3 [overflow-wrap:anywhere] break-words text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
                     >
                         <span class="font-semibold">Recorded Reason: </span>
                         {{ inspectedLog.reason }}
                     </div>
 
-                    <div class="grid gap-4 md:grid-cols-2">
-                        <div class="space-y-1.5">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div
+                            v-for="panel in [
+                                {
+                                    label: 'Previous Values',
+                                    content: formatLogValues(
+                                        inspectedLog.old_values,
+                                        'None (New Record)',
+                                    ),
+                                },
+                                {
+                                    label: 'Updated Values',
+                                    content: formatLogValues(
+                                        inspectedLog.new_values,
+                                        'None (Deleted)',
+                                    ),
+                                },
+                            ]"
+                            :key="panel.label"
+                            class="min-w-0 space-y-1.5"
+                        >
                             <p class="font-semibold text-foreground">
-                                Previous Values
+                                {{ panel.label }}
                             </p>
                             <pre
-                                class="max-h-72 overflow-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-[11px] leading-relaxed"
-                                >{{
-                                    inspectedLog.old_values
-                                        ? JSON.stringify(
-                                              inspectedLog.old_values,
-                                              null,
-                                              2,
-                                          )
-                                        : 'None (New Record)'
-                                }}</pre>
-                        </div>
-                        <div class="space-y-1.5">
-                            <p class="font-semibold text-foreground">
-                                Updated Values
-                            </p>
-                            <pre
-                                class="max-h-72 overflow-auto rounded-lg border border-border bg-muted/50 p-3 font-mono text-[11px] leading-relaxed"
-                                >{{
-                                    inspectedLog.new_values
-                                        ? JSON.stringify(
-                                              inspectedLog.new_values,
-                                              null,
-                                              2,
-                                          )
-                                        : 'None (Deleted)'
-                                }}</pre>
+                                class="max-h-72 max-w-full overflow-auto overscroll-contain rounded-lg border border-border bg-muted/50 p-3 font-mono text-[11px] leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap"
+                                >{{ panel.content }}</pre>
                         </div>
                     </div>
                 </div>
