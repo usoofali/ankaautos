@@ -210,8 +210,7 @@ function whatsappHref(message: string): string {
                     <p
                         class="mt-3 max-w-2xl text-sm text-slate-200 sm:text-base"
                     >
-                        Explore inspected company-owned and verified consignment
-                        vehicles currently on our stand. Live availability
+                        Explore inspected and verified vehicles currently on our display. Live availability
                         updated directly from our inventory.
                     </p>
                 </div>

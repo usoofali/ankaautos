@@ -16,7 +16,7 @@ class AdminUserSeeder extends Seeder
             ['email' => 'admin@ankaautos.com'],
             [
                 'name' => 'Anka Super Administrator',
-                'phone' => '+234 803 000 0000',
+                'phone' => '+1 347 963 6014',
                 'password' => Hash::make('password'),
                 'is_active' => true,
                 'email_verified_at' => now(),

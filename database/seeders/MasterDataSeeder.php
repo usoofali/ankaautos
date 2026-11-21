@@ -28,7 +28,6 @@ class MasterDataSeeder extends Seeder
         $this->seedExpenseCategories();
         $this->seedChargeCategories();
         $this->seedPaymentMethods();
-        $this->seedFinancialAccounts();
         $this->seedDocumentCategories();
     }
 
@@ -251,42 +250,6 @@ class MasterDataSeeder extends Seeder
                 [
                     'name' => $method['name'],
                     'requires_reference' => $method['requires_reference'],
-                    'is_active' => true,
-                ],
-            );
-        }
-    }
-
-    private function seedFinancialAccounts(): void
-    {
-        $accounts = [
-            [
-                'name' => 'Anka Auto Sales Operating Account',
-                'bank_name' => 'GTBank',
-                'account_number' => '0123456789',
-                'account_type' => 'bank',
-            ],
-            [
-                'name' => 'Anka Consignment Escrow Account',
-                'bank_name' => 'Zenith Bank',
-                'account_number' => '1098765432',
-                'account_type' => 'bank',
-            ],
-            [
-                'name' => 'Showroom Cash Till',
-                'bank_name' => null,
-                'account_number' => null,
-                'account_type' => 'cash',
-            ],
-        ];
-
-        foreach ($accounts as $account) {
-            FinancialAccount::query()->firstOrCreate(
-                ['name' => $account['name']],
-                [
-                    'bank_name' => $account['bank_name'],
-                    'account_number' => $account['account_number'],
-                    'account_type' => $account['account_type'],
                     'is_active' => true,
                 ],
             );
