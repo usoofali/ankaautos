@@ -137,22 +137,39 @@ function submitPayout(): void {
             :description="`${settlement.vehicle_title} · Owner: ${settlement.owner_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Settlements
-                    </Link>
-                </Button>
-                <Button as-child variant="outline" class="min-h-10">
-                    <a :href="statementPdf.url(settlement.id)">
-                        <FileDown class="mr-1.5 size-4" aria-hidden="true" />
-                        Statement PDF
-                    </a>
-                </Button>
-                <Button v-if="canDisburse" class="min-h-10" @click="openPayout">
-                    <Send class="mr-1.5 size-4" aria-hidden="true" />
-                    Record Owner Payout
-                </Button>
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
+                >
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Settlements
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a :href="statementPdf.url(settlement.id)">
+                            <FileDown
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Statement PDF
+                        </a>
+                    </Button>
+                    <Button
+                        v-if="canDisburse"
+                        class="col-span-2 min-h-10 sm:col-span-1"
+                        @click="openPayout"
+                    >
+                        <Send
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Record Owner Payout
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
@@ -192,23 +209,76 @@ function submitPayout(): void {
             </div>
         </div>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            <div class="flex flex-col gap-5 lg:col-span-2">
+        <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+            <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
                 <FormSectionCard
                     title="Itemized Settlement Breakdown"
                     description="Exact gross proceeds, commission, expense deductions, and service charges."
                 >
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                    <!-- Mobile Stacked Breakdown (< md) -->
+                    <ul class="divide-y md:hidden">
+                        <li
+                            v-for="item in settlement.items"
+                            :key="item.id"
+                            class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                        >
+                            <div class="min-w-0">
+                                <p
+                                    class="text-[11px] font-medium text-muted-foreground uppercase"
+                                >
+                                    {{ item.type_label }}
+                                </p>
+                                <p
+                                    class="mt-0.5 text-sm font-medium break-words"
+                                >
+                                    {{ item.label }}
+                                </p>
+                            </div>
+                            <span
+                                class="shrink-0 text-sm font-semibold whitespace-nowrap tabular-nums"
+                                :class="
+                                    item.item_type === 'gross_sale'
+                                        ? 'text-foreground'
+                                        : 'text-destructive'
+                                "
+                            >
+                                {{
+                                    item.item_type === 'gross_sale'
+                                        ? formatMoney(item.amount)
+                                        : `-${formatMoney(item.amount)}`
+                                }}
+                            </span>
+                        </li>
+                    </ul>
+
+                    <!-- Desktop Table (md+) -->
+                    <div
+                        class="hidden overflow-x-auto md:block"
+                        role="region"
+                        tabindex="0"
+                        aria-label="Itemized settlement breakdown"
+                    >
+                        <table class="w-full min-w-[460px] text-sm">
                             <thead>
                                 <tr
                                     class="border-b text-left text-xs text-muted-foreground"
                                 >
-                                    <th class="pb-2 font-medium">Type</th>
-                                    <th class="pb-2 font-medium">
+                                    <th
+                                        scope="col"
+                                        class="pr-3 pb-2.5 font-medium whitespace-nowrap"
+                                    >
+                                        Type
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-3 pb-2.5 font-medium"
+                                    >
                                         Description
                                     </th>
-                                    <th class="pb-2 text-right font-medium">
+                                    <th
+                                        scope="col"
+                                        class="pb-2.5 pl-3 text-right font-medium whitespace-nowrap"
+                                    >
                                         Amount
                                     </th>
                                 </tr>
@@ -219,15 +289,15 @@ function submitPayout(): void {
                                     :key="item.id"
                                 >
                                     <td
-                                        class="py-2.5 text-xs text-muted-foreground"
+                                        class="py-3 pr-3 text-xs whitespace-nowrap text-muted-foreground"
                                     >
                                         {{ item.type_label }}
                                     </td>
-                                    <td class="py-2.5 font-medium">
+                                    <td class="px-3 py-3 font-medium">
                                         {{ item.label }}
                                     </td>
                                     <td
-                                        class="py-2.5 text-right font-semibold tabular-nums"
+                                        class="py-3 pl-3 text-right font-semibold whitespace-nowrap tabular-nums"
                                         :class="
                                             item.item_type === 'gross_sale'
                                                 ? 'text-foreground'
@@ -260,9 +330,9 @@ function submitPayout(): void {
                         <li
                             v-for="p in settlement.payments"
                             :key="p.id"
-                            class="flex items-center justify-between py-2.5"
+                            class="flex items-start justify-between gap-3 py-2.5"
                         >
-                            <div>
+                            <div class="min-w-0">
                                 <span class="font-mono text-xs font-semibold">
                                     {{ p.reference_number }}
                                 </span>
@@ -276,7 +346,7 @@ function submitPayout(): void {
                                 </p>
                             </div>
                             <span
-                                class="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400"
+                                class="shrink-0 font-semibold whitespace-nowrap text-emerald-700 tabular-nums dark:text-emerald-400"
                             >
                                 {{ formatMoney(p.amount) }}
                             </span>
@@ -285,9 +355,11 @@ function submitPayout(): void {
                 </FormSectionCard>
             </div>
 
-            <div class="flex flex-col gap-5">
+            <div class="flex min-w-0 flex-col gap-5">
                 <FormSectionCard title="Settlement Totals">
-                    <div class="mb-3 flex items-center justify-between">
+                    <div
+                        class="mb-3 flex flex-wrap items-center justify-between gap-2"
+                    >
                         <StatusBadge
                             :label="settlement.status_label"
                             :variant="settlement.status_variant"
@@ -300,21 +372,25 @@ function submitPayout(): void {
                         </Link>
                     </div>
                     <dl class="space-y-2.5 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <dt class="text-muted-foreground">Gross Sale</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(settlement.gross_sale_price) }}
                             </dd>
                         </div>
-                        <div class="flex justify-between text-destructive">
+                        <div
+                            class="flex items-baseline justify-between gap-3 text-destructive"
+                        >
                             <dt>Dealership Commission</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 -{{ formatMoney(settlement.commission_amount) }}
                             </dd>
                         </div>
-                        <div class="flex justify-between text-destructive">
+                        <div
+                            class="flex items-baseline justify-between gap-3 text-destructive"
+                        >
                             <dt>Owner Expense Deductions</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 -{{
                                     formatMoney(
                                         settlement.total_expense_deductions,
@@ -326,10 +402,10 @@ function submitPayout(): void {
                             v-if="
                                 Number(settlement.total_charge_deductions) > 0
                             "
-                            class="flex justify-between text-destructive"
+                            class="flex items-baseline justify-between gap-3 text-destructive"
                         >
                             <dt>Service Charges</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 -{{
                                     formatMoney(
                                         settlement.total_charge_deductions,
@@ -338,28 +414,28 @@ function submitPayout(): void {
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 font-semibold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 font-semibold"
                         >
                             <dt>Net Payable to Owner</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{
                                     formatMoney(settlement.net_payable_to_owner)
                                 }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between text-emerald-700 dark:text-emerald-400"
+                            class="flex items-baseline justify-between gap-3 text-emerald-700 dark:text-emerald-400"
                         >
                             <dt>Total Disbursed</dt>
-                            <dd class="font-semibold tabular-nums">
+                            <dd class="shrink-0 font-semibold tabular-nums">
                                 {{ formatMoney(settlement.amount_paid) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 text-base font-bold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 text-base font-bold"
                         >
                             <dt>Remaining Balance</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(settlement.balance_due) }}
                             </dd>
                         </div>

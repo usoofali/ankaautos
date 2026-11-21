@@ -93,9 +93,20 @@ test('reservations require positive deposit, mark vehicle reserved, and carry de
         ->and($reservation->fresh()->status)->toBe(ReservationStatus::Converted)
         ->and($vehicle->fresh()->status)->toBe(VehicleStatus::Sold);
 
-    // Download sales agreement and receipt PDFs
+    // Download consolidated sales invoice, sales agreement, and per-transaction receipt PDFs (including deposit receipt)
+    $this->actingAs($salesOfficer)
+        ->get(route('sales.invoice-pdf', $sale))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+
     $this->actingAs($salesOfficer)
         ->get(route('sales.agreement-pdf', $sale))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
+
+    $depositPayment = $reservation->payments()->firstOrFail();
+    $this->actingAs($salesOfficer)
+        ->get(route('sales.receipt-pdf', ['sale' => $sale, 'payment' => $depositPayment]))
         ->assertOk()
         ->assertHeader('content-type', 'application/pdf');
 
@@ -180,6 +191,19 @@ test('installment sale blocks unpaid handover unless manager approves early rele
 
     expect($sale->fresh()->amount_paid)->toBe('7000000.00')
         ->and($sale->fresh()->balance_due)->toBe('2500000.00');
+
+    // Every installment payment generates its own custom receipt PDF, and invoice PDF covers all payments
+    foreach ($sale->fresh()->payments as $installmentPayment) {
+        $this->actingAs($manager)
+            ->get(route('sales.receipt-pdf', ['sale' => $sale, 'payment' => $installmentPayment]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    $this->actingAs($manager)
+        ->get(route('sales.invoice-pdf', $sale))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/pdf');
 
     // Manager approves early release with mandatory reason
     $this->actingAs($manager)
@@ -295,4 +319,24 @@ test('cancelling consignment sale refunds customer, reverts vehicle and consignm
         ->assertSessionHasErrors('cancellation_reason');
 
     expect($sale2->fresh()->status)->toBe(SaleStatus::Completed);
+});
+
+test('sales officer can quick-register a customer via modal endpoint for immediate sale recording', function () {
+    $salesOfficer = User::factory()->create();
+    $salesOfficer->assignRole(SystemRole::SalesOfficer->value);
+
+    $response = $this->actingAs($salesOfficer)
+        ->postJson(route('customers.quick-store'), [
+            'customer_type' => 'individual',
+            'name' => 'Mallam Kabiru Sule',
+            'phone' => '+2348091112222',
+            'email' => 'kabiru@example.ng',
+        ])
+        ->assertCreated()
+        ->assertJsonStructure([
+            'customer' => ['id', 'reference_number', 'name', 'phone'],
+        ]);
+
+    expect($response->json('customer.name'))->toBe('Mallam Kabiru Sule')
+        ->and($response->json('customer.reference_number'))->toStartWith('ANK-CUS-');
 });

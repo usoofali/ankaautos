@@ -8,6 +8,7 @@ use App\Actions\Reservations\CreateReservationAction;
 use App\Actions\Sales\CreateSaleAction;
 use App\Enums\CommissionType;
 use App\Enums\ExpenseBearer;
+use App\Enums\OwnerCategory;
 use App\Enums\OwnershipType;
 use App\Enums\VehicleStatus;
 use App\Models\Customer;
@@ -63,7 +64,7 @@ class DemoSeeder extends Seeder
             ['phone' => '+2348034411223'],
             [
                 'reference_number' => 'ANK-OWN-DEMO-001',
-                'owner_category' => 'individual',
+                'owner_category' => OwnerCategory::Individual,
                 'name' => 'Alhaji Musa Ibrahim',
                 'email' => 'musa.ibrahim@example.ng',
                 'address' => 'Maitama District, Abuja',
@@ -78,7 +79,7 @@ class DemoSeeder extends Seeder
             ['phone' => '+2348097788990'],
             [
                 'reference_number' => 'ANK-OWN-DEMO-002',
-                'owner_category' => 'corporate',
+                'owner_category' => OwnerCategory::Organization,
                 'name' => 'Zuma Fleet Holdings Ltd',
                 'email' => 'fleet@zuma.example.ng',
                 'address' => 'Central Business District, Abuja',

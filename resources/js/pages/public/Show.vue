@@ -88,7 +88,9 @@ async function copyLink(): Promise<void> {
 <template>
     <Head :title="`${vehicle.title} — ${business.name}`" />
 
-    <div class="flex min-h-screen flex-col bg-background text-foreground">
+    <div
+        class="anka-catalog-texture flex min-h-screen flex-col text-foreground"
+    >
         <header class="border-b bg-background">
             <div
                 class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6"
@@ -243,12 +245,16 @@ async function copyLink(): Promise<void> {
                     </div>
 
                     <div class="rounded-2xl border bg-card p-5">
-                        <h2 class="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                        <h2
+                            class="text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+                        >
                             Specifications
                         </h2>
                         <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
                             <div>
-                                <dt class="text-xs text-muted-foreground">Year</dt>
+                                <dt class="text-xs text-muted-foreground">
+                                    Year
+                                </dt>
                                 <dd class="font-medium">{{ vehicle.year }}</dd>
                             </div>
                             <div>
@@ -318,10 +324,14 @@ async function copyLink(): Promise<void> {
                         v-if="vehicle.public_description"
                         class="rounded-2xl border bg-card p-5"
                     >
-                        <h2 class="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                        <h2
+                            class="text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+                        >
                             Vehicle Overview
                         </h2>
-                        <p class="mt-2 whitespace-pre-line text-sm leading-relaxed">
+                        <p
+                            class="mt-2 text-sm leading-relaxed whitespace-pre-line"
+                        >
                             {{ vehicle.public_description }}
                         </p>
                     </div>

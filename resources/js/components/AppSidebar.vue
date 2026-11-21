@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import {
     BadgeDollarSign,
     BarChart3,
-    Bell,
     Building2,
     CalendarCheck2,
     Car,
+    ChevronDown,
     Database,
     FileCheck2,
     FolderLock,
@@ -22,7 +22,7 @@ import {
     Users,
     Wallet,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, onUnmounted, reactive, watch } from 'vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -35,6 +35,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { usePermissions } from '@/composables/usePermissions';
@@ -50,7 +51,6 @@ import { index as documentsIndex } from '@/routes/documents';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as financeIndex } from '@/routes/finance';
 import { index as marketingIndex } from '@/routes/marketing';
-import { index as notificationsIndex } from '@/routes/notifications';
 import { index as ownersIndex } from '@/routes/owners';
 import { index as reportsIndex } from '@/routes/reports';
 import { index as reservationsIndex } from '@/routes/reservations';
@@ -60,13 +60,36 @@ import { index as vehiclesIndex } from '@/routes/vehicles';
 import { index as withdrawalsIndex } from '@/routes/withdrawals';
 import type { NavGroup } from '@/types';
 
-const { can, canAny } = usePermissions();
-const { isCurrentUrl } = useCurrentUrl();
+type SidebarNavGroup = NavGroup & {
+    key: string;
+    collapsible?: boolean;
+};
 
-const navGroups = computed<NavGroup[]>(() => {
-    const groups: NavGroup[] = [
+const { can, canAny } = usePermissions();
+const { isCurrentUrl, currentUrl } = useCurrentUrl();
+const { isMobile, setOpenMobile, state: sidebarState } = useSidebar();
+
+function closeMobileSidebar(): void {
+    if (isMobile.value) {
+        setOpenMobile(false);
+    }
+}
+
+// Guarantee mobile sidebar closes automatically after any Inertia navigation
+const removeNavigateListener = router.on('navigate', () => {
+    closeMobileSidebar();
+});
+
+onUnmounted(() => {
+    removeNavigateListener();
+});
+
+const navGroups = computed<SidebarNavGroup[]>(() => {
+    const groups: SidebarNavGroup[] = [
         {
+            key: 'operations',
             label: 'Operations',
+            collapsible: false,
             items: [
                 {
                     title: 'Dashboard',
@@ -74,16 +97,12 @@ const navGroups = computed<NavGroup[]>(() => {
                     icon: LayoutGrid,
                     iconClass: 'text-amber-400',
                 },
-                {
-                    title: 'Notifications',
-                    href: notificationsIndex(),
-                    icon: Bell,
-                    iconClass: 'text-sky-400',
-                },
             ],
         },
         {
+            key: 'inventory',
             label: 'Inventory & Consignment',
+            collapsible: true,
             items: [
                 {
                     title: 'Vehicle Inventory',
@@ -116,7 +135,9 @@ const navGroups = computed<NavGroup[]>(() => {
             ],
         },
         {
+            key: 'sales',
             label: 'Sales & Customers',
+            collapsible: true,
             items: [
                 {
                     title: 'Customers',
@@ -142,7 +163,9 @@ const navGroups = computed<NavGroup[]>(() => {
             ],
         },
         {
+            key: 'finance',
             label: 'Finance & Settlements',
+            collapsible: true,
             items: [
                 {
                     title: 'Vehicle Expenses',
@@ -168,7 +191,9 @@ const navGroups = computed<NavGroup[]>(() => {
             ],
         },
         {
+            key: 'marketing_reports',
             label: 'Marketing, Vault & Reports',
+            collapsible: true,
             items: [
                 {
                     title: 'Marketing & Ads',
@@ -197,7 +222,9 @@ const navGroups = computed<NavGroup[]>(() => {
             ],
         },
         {
+            key: 'administration',
             label: 'Administration',
+            collapsible: true,
             items: [
                 {
                     title: 'Users & Staff',
@@ -256,6 +283,45 @@ const navGroups = computed<NavGroup[]>(() => {
         }))
         .filter((group) => group.items.length > 0);
 });
+
+const openGroups = reactive<Record<string, boolean>>({
+    inventory: false,
+    sales: false,
+    finance: false,
+    marketing_reports: false,
+    administration: false,
+});
+
+function hasActiveItem(group: SidebarNavGroup): boolean {
+    return group.items.some((item) => isCurrentUrl(item.href));
+}
+
+function isGroupOpen(group: SidebarNavGroup): boolean {
+    if (!group.collapsible) {
+        return true;
+    }
+    if (sidebarState.value === 'collapsed' && !isMobile.value) {
+        return true;
+    }
+    return Boolean(openGroups[group.key]);
+}
+
+function toggleGroup(key: string): void {
+    openGroups[key] = !openGroups[key];
+}
+
+// Automatically expand whichever collapsible group holds the active route
+watch(
+    () => currentUrl.value,
+    () => {
+        for (const group of navGroups.value) {
+            if (group.collapsible && hasActiveItem(group)) {
+                openGroups[group.key] = true;
+            }
+        }
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
@@ -264,7 +330,7 @@ const navGroups = computed<NavGroup[]>(() => {
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
-                        <Link :href="dashboard()">
+                        <Link :href="dashboard()" @click="closeMobileSidebar">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
@@ -275,15 +341,45 @@ const navGroups = computed<NavGroup[]>(() => {
         <SidebarContent>
             <SidebarGroup
                 v-for="group in navGroups"
-                :key="group.label"
+                :key="group.key"
                 class="px-2 py-1"
             >
+                <button
+                    v-if="group.collapsible"
+                    type="button"
+                    class="group/btn flex w-full items-center justify-between rounded-md px-2 py-2 text-left text-[11px] font-semibold tracking-wider text-sidebar-foreground/75 uppercase transition group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent/70 hover:text-sidebar-foreground"
+                    :aria-expanded="isGroupOpen(group)"
+                    @click="toggleGroup(group.key)"
+                >
+                    <span class="flex items-center gap-2 truncate">
+                        <span
+                            v-if="hasActiveItem(group)"
+                            class="size-1.5 shrink-0 rounded-full bg-sidebar-primary"
+                            aria-hidden="true"
+                        />
+                        <span class="truncate">{{ group.label }}</span>
+                    </span>
+                    <ChevronDown
+                        class="size-3.5 shrink-0 text-sidebar-foreground/60 transition-transform duration-200"
+                        :class="isGroupOpen(group) ? 'rotate-180' : ''"
+                        aria-hidden="true"
+                    />
+                </button>
                 <SidebarGroupLabel
+                    v-else
                     class="text-[11px] font-semibold tracking-wider text-sidebar-foreground/55 uppercase"
                 >
                     {{ group.label }}
                 </SidebarGroupLabel>
-                <SidebarMenu>
+
+                <SidebarMenu
+                    v-show="isGroupOpen(group)"
+                    :class="
+                        group.collapsible
+                            ? 'mt-0.5 space-y-0.5 border-l border-sidebar-border/60 pl-2 group-data-[collapsible=icon]:border-l-0 group-data-[collapsible=icon]:pl-0'
+                            : 'space-y-0.5'
+                    "
+                >
                     <SidebarMenuItem
                         v-for="item in group.items"
                         :key="item.title"
@@ -294,7 +390,7 @@ const navGroups = computed<NavGroup[]>(() => {
                             :tooltip="item.title"
                             class="min-h-10"
                         >
-                            <Link :href="item.href">
+                            <Link :href="item.href" @click="closeMobileSidebar">
                                 <component
                                     :is="item.icon"
                                     :class="['size-4 shrink-0', item.iconClass]"

@@ -387,8 +387,11 @@ function confirmArchive(): void {
         </div>
 
         <!-- Tab 1: Overview & Specs -->
-        <div v-if="activeTab === 'overview'" class="grid gap-5 lg:grid-cols-3">
-            <div class="space-y-5 lg:col-span-2">
+        <div
+            v-if="activeTab === 'overview'"
+            class="grid min-w-0 gap-5 lg:grid-cols-3"
+        >
+            <div class="min-w-0 space-y-5 lg:col-span-2">
                 <FormSectionCard
                     title="Vehicle Identification & Specifications"
                 >

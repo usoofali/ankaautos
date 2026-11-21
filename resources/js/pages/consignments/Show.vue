@@ -139,59 +139,75 @@ function submitAmendment(): void {
 <template>
     <Head :title="`Consignment ${consignment.reference_number}`" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
             :title="consignment.reference_number"
             :description="`Agreement v${consignment.agreement_version} · Received ${formatDate(consignment.received_at)} by ${consignment.received_by_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Consignments
-                    </Link>
-                </Button>
-                <Button as-child variant="outline" class="min-h-10">
-                    <a :href="agreementPdf.url(consignment.id)">
-                        <Download class="mr-1.5 size-4" aria-hidden="true" />
-                        Agreement PDF
-                    </a>
-                </Button>
-                <Button
-                    v-if="
-                        can('withdrawals.initiate') &&
-                        (consignment.status === 'active' ||
-                            consignment.status === 'on_hold')
-                    "
-                    as-child
-                    variant="outline"
-                    class="min-h-10"
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
                 >
-                    <Link
-                        :href="
-                            createWithdrawal({
-                                query: { consignment_id: consignment.id },
-                            })
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Consignments
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a :href="agreementPdf.url(consignment.id)">
+                            <Download
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Agreement PDF
+                        </a>
+                    </Button>
+                    <Button
+                        v-if="
+                            can('withdrawals.initiate') &&
+                            (consignment.status === 'active' ||
+                                consignment.status === 'on_hold')
                         "
+                        as-child
+                        variant="outline"
+                        class="min-h-10"
                     >
-                        <Undo2 class="mr-1.5 size-4" aria-hidden="true" />
-                        Initiate Withdrawal
-                    </Link>
-                </Button>
-                <Button
-                    v-if="canAmend"
-                    type="button"
-                    class="min-h-10"
-                    @click="amendOpen = true"
-                >
-                    <FileEdit class="mr-1.5 size-4" aria-hidden="true" />
-                    Amend Terms
-                </Button>
+                        <Link
+                            :href="
+                                createWithdrawal({
+                                    query: { consignment_id: consignment.id },
+                                })
+                            "
+                        >
+                            <Undo2
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Initiate Withdrawal
+                        </Link>
+                    </Button>
+                    <Button
+                        v-if="canAmend"
+                        type="button"
+                        class="min-h-10"
+                        @click="amendOpen = true"
+                    >
+                        <FileEdit
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Amend Terms
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            <div class="space-y-5 lg:col-span-2">
+        <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+            <div class="min-w-0 space-y-5 lg:col-span-2">
                 <FormSectionCard title="Active Financial & Commission Terms">
                     <template #headerAction>
                         <StatusBadge

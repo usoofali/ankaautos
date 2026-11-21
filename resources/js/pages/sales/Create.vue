@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Plus, Trash2 } from '@lucide/vue';
-import { computed, watch } from 'vue';
+import { ArrowLeft, Plus, Trash2, UserPlus } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
 import FormSectionCard from '@/components/anka/FormSectionCard.vue';
 import PageHeader from '@/components/anka/PageHeader.vue';
+import QuickCustomerModal, {
+    type QuickCustomer,
+} from '@/components/anka/QuickCustomerModal.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { useFormatting } from '@/composables/useFormatting';
+import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
 import { index, store } from '@/routes/sales';
 
@@ -66,7 +70,16 @@ defineOptions({
     },
 });
 
+const { can } = usePermissions();
 const { formatMoney } = useFormatting();
+
+const customerList = ref<QuickCustomer[]>([...props.customers]);
+const quickCustomerOpen = ref(false);
+
+function onCustomerCreated(customer: QuickCustomer): void {
+    customerList.value.unshift(customer);
+    form.customer_id = customer.id;
+}
 
 function generateIdempotencyKey(): string {
     if (
@@ -225,8 +238,8 @@ function submit(): void {
                 </p>
             </div>
 
-            <div class="grid gap-5 lg:grid-cols-3">
-                <div class="flex flex-col gap-5 lg:col-span-2">
+            <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+                <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
                     <FormSectionCard
                         title="Vehicle & Buyer"
                         description="Select the vehicle being sold and the purchasing customer."
@@ -253,7 +266,28 @@ function submit(): void {
                             </div>
 
                             <div class="grid gap-1.5 sm:col-span-2">
-                                <Label for="customer_id">Customer</Label>
+                                <div
+                                    class="flex items-center justify-between gap-2"
+                                >
+                                    <Label for="customer_id">Customer</Label>
+                                    <Button
+                                        v-if="
+                                            preselectedReservation === null &&
+                                            can('customers.manage')
+                                        "
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        class="h-8 text-xs"
+                                        @click="quickCustomerOpen = true"
+                                    >
+                                        <UserPlus
+                                            class="mr-1.5 size-3.5"
+                                            aria-hidden="true"
+                                        />
+                                        New Customer
+                                    </Button>
+                                </div>
                                 <select
                                     id="customer_id"
                                     v-model="form.customer_id"
@@ -262,7 +296,7 @@ function submit(): void {
                                     required
                                 >
                                     <option
-                                        v-for="c in customers"
+                                        v-for="c in customerList"
                                         :key="c.id"
                                         :value="c.id"
                                     >
@@ -590,17 +624,19 @@ function submit(): void {
                     </FormSectionCard>
                 </div>
 
-                <div class="flex flex-col gap-5">
+                <div class="flex min-w-0 flex-col gap-5">
                     <FormSectionCard
                         title="Sale Summary"
                         description="Live breakdown before confirmation."
                     >
                         <dl class="space-y-3 text-sm">
-                            <div class="flex justify-between">
+                            <div
+                                class="flex items-baseline justify-between gap-3"
+                            >
                                 <dt class="text-muted-foreground">
                                     List Price
                                 </dt>
-                                <dd class="font-medium tabular-nums">
+                                <dd class="shrink-0 font-medium tabular-nums">
                                     {{ formatMoney(form.list_price || 0) }}
                                 </dd>
                             </div>
@@ -609,35 +645,37 @@ function submit(): void {
                                     canApproveDiscount &&
                                     Number(form.discount_amount) > 0
                                 "
-                                class="flex justify-between text-destructive"
+                                class="flex items-baseline justify-between gap-3 text-destructive"
                             >
                                 <dt>Approved Discount</dt>
-                                <dd class="font-medium tabular-nums">
+                                <dd class="shrink-0 font-medium tabular-nums">
                                     -{{ formatMoney(form.discount_amount) }}
                                 </dd>
                             </div>
                             <div
-                                class="flex justify-between border-t pt-2.5 text-base font-semibold"
+                                class="flex items-baseline justify-between gap-3 border-t pt-2.5 text-base font-semibold"
                             >
                                 <dt>Final Sale Price</dt>
-                                <dd class="tabular-nums">
+                                <dd class="shrink-0 tabular-nums">
                                     {{ formatMoney(finalPricePreview) }}
                                 </dd>
                             </div>
                             <div
                                 v-if="depositCredit > 0"
-                                class="flex justify-between text-emerald-700 dark:text-emerald-400"
+                                class="flex items-baseline justify-between gap-3 text-emerald-700 dark:text-emerald-400"
                             >
                                 <dt>Reservation Deposit</dt>
-                                <dd class="font-medium tabular-nums">
+                                <dd class="shrink-0 font-medium tabular-nums">
                                     {{ formatMoney(depositCredit) }}
                                 </dd>
                             </div>
-                            <div class="flex justify-between">
+                            <div
+                                class="flex items-baseline justify-between gap-3"
+                            >
                                 <dt class="text-muted-foreground">
                                     Payment Now
                                 </dt>
-                                <dd class="font-medium tabular-nums">
+                                <dd class="shrink-0 font-medium tabular-nums">
                                     {{
                                         formatMoney(
                                             form.initial_payment_amount || 0,
@@ -646,11 +684,11 @@ function submit(): void {
                                 </dd>
                             </div>
                             <div
-                                class="flex justify-between border-t pt-2.5 font-semibold"
+                                class="flex items-baseline justify-between gap-3 border-t pt-2.5 font-semibold"
                             >
                                 <dt>Projected Balance Due</dt>
                                 <dd
-                                    class="tabular-nums"
+                                    class="shrink-0 tabular-nums"
                                     :class="
                                         balancePreview > 0
                                             ? 'text-amber-700 dark:text-amber-400'
@@ -694,5 +732,10 @@ function submit(): void {
                 </div>
             </div>
         </form>
+
+        <QuickCustomerModal
+            v-model:open="quickCustomerOpen"
+            @created="onCustomerCreated"
+        />
     </div>
 </template>

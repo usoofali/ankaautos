@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\AuditLogger;
 use App\Services\ReferenceNumberGenerator;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -116,6 +117,43 @@ class CustomerController extends Controller
         ]);
 
         return redirect()->route('customers.show', $customer);
+    }
+
+    public function quickStore(Request $request): JsonResponse
+    {
+        /** @var User $actor */
+        $actor = $request->user();
+
+        $validated = $request->validate([
+            'customer_type' => ['required', Rule::enum(OwnerCategory::class)],
+            'name' => ['required', 'string', 'max:150'],
+            'phone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'address' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        /** @var Customer $customer */
+        $customer = Customer::query()->create([
+            ...$validated,
+            'reference_number' => $this->referenceGenerator->generate('CUS'),
+            'created_by' => $actor->id,
+        ]);
+
+        $this->auditLogger->activity(
+            action: 'customer.created',
+            description: "Quick-registered customer {$customer->name} ({$customer->reference_number}).",
+            subject: $customer,
+            actor: $actor,
+        );
+
+        return response()->json([
+            'customer' => [
+                'id' => $customer->id,
+                'reference_number' => $customer->reference_number,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+            ],
+        ], 201);
     }
 
     public function show(Customer $customer): Response

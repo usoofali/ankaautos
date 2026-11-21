@@ -89,43 +89,53 @@ function submitCancel(): void {
 <template>
     <Head :title="`Reservation ${reservation.reference_number}`" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
             :title="reservation.reference_number"
             :description="`${reservation.vehicle_title} · Reserved by ${reservation.customer_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Reservations
-                    </Link>
-                </Button>
-                <Button v-if="canConvert" as-child class="min-h-10">
-                    <Link
-                        :href="
-                            createSale({
-                                query: { reservation_id: reservation.id },
-                            })
-                        "
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
+                >
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Reservations
+                        </Link>
+                    </Button>
+                    <Button v-if="canConvert" as-child class="min-h-10">
+                        <Link
+                            :href="
+                                createSale({
+                                    query: { reservation_id: reservation.id },
+                                })
+                            "
+                        >
+                            <BadgeDollarSign
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Convert to Sale
+                        </Link>
+                    </Button>
+                    <Button
+                        v-if="canCancel"
+                        type="button"
+                        variant="destructive"
+                        class="col-span-2 min-h-10 sm:col-span-1"
+                        @click="cancelOpen = true"
                     >
-                        <BadgeDollarSign
-                            class="mr-1.5 size-4"
+                        <XCircle
+                            class="mr-1.5 size-4 shrink-0"
                             aria-hidden="true"
                         />
-                        Convert to Sale
-                    </Link>
-                </Button>
-                <Button
-                    v-if="canCancel"
-                    type="button"
-                    variant="destructive"
-                    class="min-h-10"
-                    @click="cancelOpen = true"
-                >
-                    <XCircle class="mr-1.5 size-4" aria-hidden="true" />
-                    Cancel Reservation
-                </Button>
+                        Cancel Reservation
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 

@@ -7,18 +7,29 @@ defineProps<{
 
 <template>
     <section
-        class="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs"
+        class="overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm"
     >
         <div
-            class="flex flex-col gap-1 border-b border-border/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+            class="flex flex-col gap-1 border-b border-border/75 bg-gradient-to-r from-muted/55 via-muted/25 to-transparent px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6"
         >
-            <div class="space-y-0.5">
-                <h2 class="text-base font-semibold text-card-foreground">
-                    {{ title }}
-                </h2>
-                <p v-if="description" class="text-sm text-muted-foreground">
-                    {{ description }}
-                </p>
+            <div class="flex items-start gap-2.5">
+                <span
+                    class="mt-2 size-2 shrink-0 rounded-full bg-[#DC141E]/85"
+                    aria-hidden="true"
+                />
+                <div class="space-y-0.5">
+                    <h2
+                        class="text-base font-semibold tracking-tight text-card-foreground"
+                    >
+                        {{ title }}
+                    </h2>
+                    <p
+                        v-if="description"
+                        class="text-xs text-muted-foreground sm:text-sm"
+                    >
+                        {{ description }}
+                    </p>
+                </div>
             </div>
             <div v-if="$slots.headerAction" class="shrink-0">
                 <slot name="headerAction" />

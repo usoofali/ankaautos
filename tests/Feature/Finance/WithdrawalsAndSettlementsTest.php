@@ -51,6 +51,10 @@ test('consignment withdrawal enforces strict 100 percent cash-first payment befo
     $method = PaymentMethod::query()->firstOrFail();
     $account = FinancialAccount::query()->firstOrFail();
 
+    // Verify withdrawals index and create pages render cleanly
+    $this->actingAs($manager)->get(route('withdrawals.index'))->assertOk();
+    $this->actingAs($manager)->get(route('withdrawals.create'))->assertOk();
+
     // Initiate withdrawal with a ₦50,000 withdrawal charge -> Total Due = ₦200,000
     $this->actingAs($manager)
         ->post(route('withdrawals.store'), [
@@ -66,6 +70,8 @@ test('consignment withdrawal enforces strict 100 percent cash-first payment befo
         ->assertRedirect();
 
     $withdrawal = WithdrawalRequest::query()->where('consignment_id', $consignment->id)->firstOrFail();
+
+    $this->actingAs($manager)->get(route('withdrawals.show', $withdrawal))->assertOk();
 
     expect($withdrawal->total_due)->toBe('200000.00')
         ->and($withdrawal->balance_due)->toBe('200000.00')

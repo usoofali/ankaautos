@@ -150,12 +150,12 @@ function getAriaSort(
 
 <template>
     <div
-        class="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs"
+        class="overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm"
     >
         <!-- Toolbar -->
         <div
             v-if="showSearch || $slots.filters || showPerPage || title"
-            class="flex flex-col gap-3 border-b border-border/70 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+            class="flex flex-col gap-3 border-b border-border/75 bg-gradient-to-r from-muted/45 via-muted/20 to-transparent p-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
         >
             <div
                 class="flex flex-1 flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center"

@@ -94,7 +94,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
 
     <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
-            title="Consignment Management"
+            title="Consignments"
             description="Track third-party consignment agreements, agreed selling prices, commission arrangements, and versioned terms."
         >
             <template v-if="can('consignments.create')" #actions>
@@ -183,12 +183,14 @@ function updateQuery(overrides: Record<string, string | number>): void {
                             :variant="row.status_variant"
                         />
                     </div>
-                    <div class="flex items-center justify-between text-xs">
+                    <div
+                        class="flex items-baseline justify-between gap-2 text-xs"
+                    >
                         <span class="text-muted-foreground">{{
                             row.commission_type_label
                         }}</span>
                         <span
-                            class="text-sm font-semibold text-foreground tabular-nums"
+                            class="shrink-0 text-sm font-semibold whitespace-nowrap text-foreground tabular-nums"
                         >
                             {{ formatMoney(row.agreed_selling_price) }}
                         </span>
@@ -234,11 +236,11 @@ function updateQuery(overrides: Record<string, string | number>): void {
                     {{ row.commission_type_label }}
                 </td>
                 <td
-                    class="px-4 py-3.5 text-right font-semibold text-foreground tabular-nums"
+                    class="px-4 py-3.5 text-right font-semibold whitespace-nowrap text-foreground tabular-nums"
                 >
                     {{ formatMoney(row.agreed_selling_price) }}
                 </td>
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <StatusBadge
                         :label="row.status_label"
                         :variant="row.status_variant"
@@ -249,7 +251,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
                 >
                     {{ formatDate(row.received_at) }}
                 </td>
-                <td class="px-4 py-3.5 text-right">
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
                     <Button
                         as-child
                         variant="outline"

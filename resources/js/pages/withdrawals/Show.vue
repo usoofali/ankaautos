@@ -193,50 +193,69 @@ function submitHandover(): void {
 <template>
     <Head :title="`Withdrawal ${withdrawal.reference_number}`" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
             :title="withdrawal.reference_number"
             :description="`${withdrawal.vehicle_title} · Owner: ${withdrawal.owner_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Withdrawals
-                    </Link>
-                </Button>
-                <Button as-child variant="outline" class="min-h-10">
-                    <a :href="statementPdf.url(withdrawal.id)">
-                        <FileDown class="mr-1.5 size-4" aria-hidden="true" />
-                        Statement PDF
-                    </a>
-                </Button>
-                <Button
-                    v-if="canAddCharge"
-                    variant="outline"
-                    class="min-h-10"
-                    @click="chargeOpen = true"
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
                 >
-                    <Plus class="mr-1.5 size-4" aria-hidden="true" />
-                    Add Charge
-                </Button>
-                <Button
-                    v-if="canRecordPayment"
-                    class="min-h-10"
-                    @click="openPayment"
-                >
-                    <CreditCard class="mr-1.5 size-4" aria-hidden="true" />
-                    Record Payment
-                </Button>
-                <Button
-                    v-if="canCompleteHandover"
-                    variant="secondary"
-                    class="min-h-10"
-                    @click="handoverOpen = true"
-                >
-                    <KeyRound class="mr-1.5 size-4" aria-hidden="true" />
-                    Complete Handover
-                </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Withdrawals
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a :href="statementPdf.url(withdrawal.id)">
+                            <FileDown
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Statement PDF
+                        </a>
+                    </Button>
+                    <Button
+                        v-if="canAddCharge"
+                        variant="outline"
+                        class="min-h-10"
+                        @click="chargeOpen = true"
+                    >
+                        <Plus
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Add Charge
+                    </Button>
+                    <Button
+                        v-if="canRecordPayment"
+                        class="min-h-10"
+                        @click="openPayment"
+                    >
+                        <CreditCard
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Record Payment
+                    </Button>
+                    <Button
+                        v-if="canCompleteHandover"
+                        variant="secondary"
+                        class="min-h-10"
+                        @click="handoverOpen = true"
+                    >
+                        <KeyRound
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Complete Handover
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
@@ -273,8 +292,8 @@ function submitHandover(): void {
             </div>
         </div>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            <div class="flex flex-col gap-5 lg:col-span-2">
+        <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+            <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
                 <FormSectionCard title="Withdrawal Summary">
                     <div class="mb-3 flex flex-wrap items-center gap-2">
                         <StatusBadge
@@ -332,17 +351,21 @@ function submitHandover(): void {
                         <li
                             v-for="e in withdrawal.owner_expenses"
                             :key="e.id"
-                            class="flex items-center justify-between py-2.5"
+                            class="flex items-start justify-between gap-3 py-2.5"
                         >
-                            <div>
+                            <div class="min-w-0">
                                 <span
                                     class="font-mono text-xs text-muted-foreground"
                                 >
                                     {{ e.reference_number }}
                                 </span>
-                                <p class="font-medium">{{ e.description }}</p>
+                                <p class="font-medium break-words">
+                                    {{ e.description }}
+                                </p>
                             </div>
-                            <span class="font-semibold tabular-nums">
+                            <span
+                                class="shrink-0 font-semibold whitespace-nowrap tabular-nums"
+                            >
                                 {{ formatMoney(e.amount) }}
                             </span>
                         </li>
@@ -360,10 +383,12 @@ function submitHandover(): void {
                         <li
                             v-for="c in withdrawal.charges"
                             :key="c.id"
-                            class="flex items-center justify-between py-2.5"
+                            class="flex items-start justify-between gap-3 py-2.5"
                         >
-                            <div>
-                                <p class="font-medium">{{ c.label }}</p>
+                            <div class="min-w-0">
+                                <p class="font-medium break-words">
+                                    {{ c.label }}
+                                </p>
                                 <p
                                     v-if="c.notes"
                                     class="text-xs text-muted-foreground"
@@ -371,7 +396,9 @@ function submitHandover(): void {
                                     {{ c.notes }}
                                 </p>
                             </div>
-                            <span class="font-semibold tabular-nums">
+                            <span
+                                class="shrink-0 font-semibold whitespace-nowrap tabular-nums"
+                            >
                                 {{ formatMoney(c.amount) }}
                             </span>
                         </li>
@@ -389,9 +416,9 @@ function submitHandover(): void {
                         <li
                             v-for="p in withdrawal.payments"
                             :key="p.id"
-                            class="flex items-center justify-between py-2.5"
+                            class="flex items-start justify-between gap-3 py-2.5"
                         >
-                            <div>
+                            <div class="min-w-0">
                                 <span class="font-mono text-xs font-semibold">
                                     {{ p.reference_number }}
                                 </span>
@@ -402,7 +429,7 @@ function submitHandover(): void {
                                 </p>
                             </div>
                             <span
-                                class="font-semibold text-emerald-700 tabular-nums dark:text-emerald-400"
+                                class="shrink-0 font-semibold whitespace-nowrap text-emerald-700 tabular-nums dark:text-emerald-400"
                             >
                                 {{ formatMoney(p.amount) }}
                             </span>
@@ -411,24 +438,24 @@ function submitHandover(): void {
                 </FormSectionCard>
             </div>
 
-            <div class="flex flex-col gap-5">
+            <div class="flex min-w-0 flex-col gap-5">
                 <FormSectionCard title="Clearance Totals">
                     <dl class="space-y-3 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <dt class="text-muted-foreground">
                                 Owner Expenses
                             </dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{
                                     formatMoney(withdrawal.total_owner_expenses)
                                 }}
                             </dd>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <dt class="text-muted-foreground">
                                 Withdrawal Charges
                             </dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{
                                     formatMoney(
                                         withdrawal.total_withdrawal_charges,
@@ -437,26 +464,26 @@ function submitHandover(): void {
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 font-semibold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 font-semibold"
                         >
                             <dt>Total Due</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(withdrawal.total_due) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between text-emerald-700 dark:text-emerald-400"
+                            class="flex items-baseline justify-between gap-3 text-emerald-700 dark:text-emerald-400"
                         >
                             <dt>Amount Paid</dt>
-                            <dd class="font-semibold tabular-nums">
+                            <dd class="shrink-0 font-semibold tabular-nums">
                                 {{ formatMoney(withdrawal.amount_paid) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 text-base font-bold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 text-base font-bold"
                         >
                             <dt>Balance Due</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(withdrawal.balance_due) }}
                             </dd>
                         </div>

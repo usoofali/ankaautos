@@ -125,7 +125,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
             </template>
         </PageHeader>
 
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
             <StatCard
                 label="Total Recorded"
                 :value="formatMoney(summary.total_amount, { compact: true })"
@@ -331,7 +331,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
                     />
                 </td>
                 <td
-                    class="px-4 py-3.5 text-right font-semibold text-foreground tabular-nums"
+                    class="px-4 py-3.5 text-right font-semibold whitespace-nowrap text-foreground tabular-nums"
                 >
                     <div>{{ formatMoney(row.amount) }}</div>
                     <div
@@ -341,7 +341,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
                         Bal: {{ formatMoney(row.balance_due) }}
                     </div>
                 </td>
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <StatusBadge
                         :label="row.payment_status_label"
                         :variant="row.payment_status_variant"
@@ -352,7 +352,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
                 >
                     {{ formatDate(row.expense_date) }}
                 </td>
-                <td class="px-4 py-3.5 text-right">
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
                     <Button
                         as-child
                         variant="outline"

@@ -19,10 +19,12 @@ use App\Models\Sale;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Services\BusinessSettingService;
+use App\Support\Money;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -200,6 +202,9 @@ class SaleController extends Controller
             'payments.paymentMethod:id,name',
             'payments.financialAccount:id,name',
             'payments.recorder:id,name',
+            'reservation.payments.paymentMethod:id,name',
+            'reservation.payments.financialAccount:id,name',
+            'reservation.payments.recorder:id,name',
             'discounts.approver:id,name',
             'handover.items',
             'handover.officer:id,name',
@@ -238,7 +243,7 @@ class SaleController extends Controller
                 'cancellation_reason' => $sale->cancellation_reason,
                 'early_handover_reason' => $sale->early_handover_reason,
                 'sales_officer_name' => $sale->salesOfficer->name ?? 'System',
-                'payments' => $sale->payments->map(static fn (Payment $p): array => [
+                'payments' => $this->allSalePayments($sale)->map(static fn (Payment $p): array => [
                     'id' => $p->id,
                     'reference_number' => $p->reference_number,
                     'payment_type_label' => $p->payment_type->label(),
@@ -360,17 +365,103 @@ class SaleController extends Controller
 
     public function receiptPdf(Sale $sale, Payment $payment): HttpResponse
     {
-        abort_unless($payment->payable_id === $sale->id && $payment->payable_type === $sale->getMorphClass(), 404);
-        $sale->load(['vehicle.brand', 'vehicle.model', 'customer']);
+        $sale->load([
+            'vehicle.brand',
+            'vehicle.model',
+            'customer',
+            'payments.paymentMethod',
+            'payments.financialAccount',
+            'payments.recorder',
+            'reservation.payments.paymentMethod',
+            'reservation.payments.financialAccount',
+            'reservation.payments.recorder',
+        ]);
+
+        $allPayments = $this->allSalePayments($sale);
+        $index = $allPayments->search(static fn (Payment $p): bool => $p->id === $payment->id);
+        abort_if($index === false, 404);
+
         $payment->load(['paymentMethod', 'financialAccount', 'recorder']);
+
+        $previouslyPaid = Money::zero();
+        $cumulativePaid = Money::zero();
+        foreach ($allPayments as $idx => $p) {
+            $amt = Money::fromDecimal($p->amount);
+            if ($idx < $index) {
+                $previouslyPaid = $previouslyPaid->add($amt);
+            }
+            if ($idx <= $index) {
+                $cumulativePaid = $cumulativePaid->add($amt);
+            }
+        }
+
+        $saleTotal = Money::fromDecimal($sale->final_price);
+        $balanceAfter = $saleTotal->subtract($cumulativePaid)->max(Money::zero());
+        $totalCount = $allPayments->count();
+        $position = (int) $index + 1;
+
+        $paymentSequenceLabel = $totalCount > 1
+            ? "Payment #{$position} of {$totalCount}"
+            : ($balanceAfter->isZero() ? 'Full Payment (1 of 1)' : 'Initial Payment (1 of 1)');
 
         $pdf = Pdf::loadView('pdfs.payment-receipt', [
             'sale' => $sale,
             'payment' => $payment,
+            'paymentSequenceLabel' => $paymentSequenceLabel,
+            'previouslyPaid' => $previouslyPaid->toDecimal(),
+            'cumulativePaidAtReceipt' => $cumulativePaid->toDecimal(),
+            'balanceAfterReceipt' => $balanceAfter->toDecimal(),
             'business' => $this->businessSettings->all(),
         ])->setPaper('a4');
 
         return $pdf->download("Receipt-{$payment->reference_number}.pdf");
+    }
+
+    public function invoicePdf(Sale $sale): HttpResponse
+    {
+        $sale->load([
+            'vehicle.brand',
+            'vehicle.model',
+            'customer',
+            'salesOfficer',
+            'discounts',
+            'charges.category',
+            'payments.paymentMethod',
+            'payments.financialAccount',
+            'reservation.payments.paymentMethod',
+            'reservation.payments.financialAccount',
+        ]);
+
+        $allPayments = $this->allSalePayments($sale);
+
+        $pdf = Pdf::loadView('pdfs.sales-invoice', [
+            'sale' => $sale,
+            'allPayments' => $allPayments,
+            'business' => $this->businessSettings->all(),
+        ])->setPaper('a4');
+
+        return $pdf->download("Invoice-{$sale->reference_number}.pdf");
+    }
+
+    /**
+     * Chronological collection of all payments covering a sale (including any carried-over reservation deposit).
+     *
+     * @return Collection<int, Payment>
+     */
+    private function allSalePayments(Sale $sale): Collection
+    {
+        /** @var Collection<int, Payment> $reservationPayments */
+        $reservationPayments = $sale->reservation !== null
+            ? $sale->reservation->payments
+            : collect();
+
+        return $reservationPayments
+            ->concat($sale->payments)
+            ->sortBy([
+                ['paid_at', 'asc'],
+                ['id', 'asc'],
+            ])
+            ->values();
     }
 
     public function agreementPdf(Sale $sale): HttpResponse

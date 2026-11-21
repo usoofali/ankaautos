@@ -110,43 +110,56 @@ function submitPayment(): void {
 <template>
     <Head :title="`Expense ${expense.reference_number}`" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
             :title="expense.reference_number"
             :description="`${expense.category_name} · Recorded ${formatDate(expense.expense_date)} by ${expense.recorded_by_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Expenses
-                    </Link>
-                </Button>
-                <Button
-                    v-if="expense.has_receipt"
-                    as-child
-                    variant="outline"
-                    class="min-h-10"
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
                 >
-                    <a :href="receipt.url(expense.id)">
-                        <Download class="mr-1.5 size-4" aria-hidden="true" />
-                        Download Receipt
-                    </a>
-                </Button>
-                <Button
-                    v-if="canRecordPayment"
-                    type="button"
-                    class="min-h-10"
-                    @click="paymentModalOpen = true"
-                >
-                    <CreditCard class="mr-1.5 size-4" aria-hidden="true" />
-                    Record Payment
-                </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Expenses
+                        </Link>
+                    </Button>
+                    <Button
+                        v-if="expense.has_receipt"
+                        as-child
+                        variant="outline"
+                        class="min-h-10"
+                    >
+                        <a :href="receipt.url(expense.id)">
+                            <Download
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Receipt
+                        </a>
+                    </Button>
+                    <Button
+                        v-if="canRecordPayment"
+                        type="button"
+                        class="col-span-2 min-h-10 sm:col-span-1"
+                        @click="paymentModalOpen = true"
+                    >
+                        <CreditCard
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Record Payment
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            <div class="space-y-5 lg:col-span-2">
+        <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+            <div class="min-w-0 space-y-5 lg:col-span-2">
                 <FormSectionCard title="Expense Summary">
                     <template #headerAction>
                         <div class="flex flex-wrap gap-1.5">

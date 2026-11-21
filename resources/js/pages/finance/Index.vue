@@ -234,20 +234,22 @@ function submitAdjustment(): void {
 
             <template #mobile-card="{ row }">
                 <div class="space-y-2">
-                    <div class="flex items-start justify-between gap-2">
-                        <div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
                             <span class="font-mono text-xs font-semibold">
                                 {{ row.reference_number }}
                             </span>
-                            <p class="mt-0.5 text-sm font-medium">
+                            <p class="mt-0.5 text-sm font-medium break-words">
                                 {{ row.type_label }}
                             </p>
-                            <p class="text-xs text-muted-foreground">
+                            <p
+                                class="text-xs break-words text-muted-foreground"
+                            >
                                 {{ row.description }}
                             </p>
                         </div>
                         <span
-                            class="font-semibold tabular-nums"
+                            class="shrink-0 font-semibold whitespace-nowrap tabular-nums"
                             :class="
                                 row.direction === 'inflow'
                                     ? 'text-emerald-700 dark:text-emerald-400'
@@ -259,13 +261,13 @@ function submitAdjustment(): void {
                         </span>
                     </div>
                     <div
-                        class="flex items-center justify-between border-t pt-2 text-xs"
+                        class="flex flex-wrap items-center justify-between gap-2 border-t pt-2 text-xs"
                     >
                         <StatusBadge
                             :label="row.bucket_label"
                             :variant="row.bucket_variant"
                         />
-                        <span class="text-muted-foreground">
+                        <span class="whitespace-nowrap text-muted-foreground">
                             {{ formatDate(row.transacted_at) }}
                         </span>
                     </div>
@@ -273,7 +275,7 @@ function submitAdjustment(): void {
             </template>
 
             <template #row="{ row }">
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <span class="font-mono text-xs font-semibold">
                         {{ row.reference_number }}
                     </span>
@@ -290,7 +292,7 @@ function submitAdjustment(): void {
                         {{ row.description }}
                     </div>
                 </td>
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <StatusBadge
                         :label="row.bucket_label"
                         :variant="row.bucket_variant"
@@ -302,9 +304,9 @@ function submitAdjustment(): void {
                         {{ row.method_name }}
                     </div>
                 </td>
-                <td class="px-4 py-3.5 text-right">
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
                     <span
-                        class="inline-flex items-center gap-1 font-semibold tabular-nums"
+                        class="inline-flex items-center gap-1 font-semibold whitespace-nowrap tabular-nums"
                         :class="
                             row.direction === 'inflow'
                                 ? 'text-emerald-700 dark:text-emerald-400'
@@ -320,7 +322,7 @@ function submitAdjustment(): void {
                         }}{{ formatMoney(row.amount) }}
                     </span>
                 </td>
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <div class="text-xs text-muted-foreground">
                         {{ formatDate(row.transacted_at) }}
                     </div>

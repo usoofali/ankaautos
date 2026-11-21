@@ -17,6 +17,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         Route::post('/', [CustomerController::class, 'store'])
             ->middleware('permission:customers.manage')
             ->name('store');
+        Route::post('/quick', [CustomerController::class, 'quickStore'])
+            ->middleware('permission:customers.manage')
+            ->name('quick-store');
         Route::get('/{customer}', [CustomerController::class, 'show'])
             ->middleware('permission:customers.view')
             ->name('show');
@@ -76,6 +79,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function (): void {
         Route::get('/{sale}/payments/{payment}/receipt-pdf', [SaleController::class, 'receiptPdf'])
             ->middleware('permission:sales.view')
             ->name('receipt-pdf');
+        Route::get('/{sale}/invoice-pdf', [SaleController::class, 'invoicePdf'])
+            ->middleware('permission:sales.view')
+            ->name('invoice-pdf');
         Route::get('/{sale}/agreement-pdf', [SaleController::class, 'agreementPdf'])
             ->middleware('permission:sales.view')
             ->name('agreement-pdf');

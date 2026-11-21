@@ -137,7 +137,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
             </template>
         </PageHeader>
 
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4 xl:gap-4">
             <StatCard
                 label="Total Registered"
                 :value="summary.total"

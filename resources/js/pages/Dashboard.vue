@@ -2,6 +2,7 @@
 import { Deferred, Head, Link } from '@inertiajs/vue3';
 import {
     Activity,
+    ArrowRight,
     BadgeDollarSign,
     CalendarCheck2,
     Car,
@@ -23,8 +24,21 @@ import { Button } from '@/components/ui/button';
 import { useFormatting } from '@/composables/useFormatting';
 import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
-import { create as createSale, show as showSale } from '@/routes/sales';
-import { create as createVehicle } from '@/routes/vehicles';
+import { index as auditLogsIndex } from '@/routes/admin/audit-logs';
+import { index as consignmentsIndex } from '@/routes/consignments';
+import { index as expensesIndex } from '@/routes/expenses';
+import { index as reservationsIndex } from '@/routes/reservations';
+import {
+    create as createSale,
+    index as salesIndex,
+    show as showSale,
+} from '@/routes/sales';
+import { index as settlementsIndex } from '@/routes/settlements';
+import {
+    create as createVehicle,
+    index as vehiclesIndex,
+} from '@/routes/vehicles';
+import { index as withdrawalsIndex } from '@/routes/withdrawals';
 
 type OperationalMetrics = {
     total_vehicles: number;
@@ -110,109 +124,199 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
             </template>
         </PageHeader>
 
-        <!-- Operational KPIs (Deferred with skeleton) -->
-        <Deferred data="operational">
-            <template #fallback>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div
-                        v-for="i in 4"
-                        :key="i"
-                        class="h-28 animate-pulse rounded-xl border bg-muted/40"
+        <!-- Operational KPIs (Clickable + Deferred with skeleton) -->
+        <section class="space-y-3" aria-label="Operational metrics">
+            <h2
+                class="px-0.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+            >
+                Inventory &amp; Sales Pulse
+            </h2>
+            <Deferred data="operational">
+                <template #fallback>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div
+                            v-for="i in 4"
+                            :key="i"
+                            class="h-30 animate-pulse rounded-xl border bg-card/60"
+                        />
+                    </div>
+                </template>
+
+                <div
+                    v-if="operational"
+                    class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                >
+                    <StatCard
+                        label="Available Vehicles"
+                        :value="String(operational.available_vehicles)"
+                        :description="`${operational.total_vehicles} total active stock`"
+                        :icon="Car"
+                        tone="primary"
+                        :href="
+                            can('vehicles.view')
+                                ? vehiclesIndex({
+                                      query: { status: 'available' },
+                                  })
+                                : undefined
+                        "
+                    />
+                    <StatCard
+                        label="Reserved Vehicles"
+                        :value="String(operational.reserved_vehicles)"
+                        description="Deposit-backed reservations"
+                        :icon="CalendarCheck2"
+                        tone="info"
+                        :href="
+                            can('reservations.view')
+                                ? reservationsIndex()
+                                : can('vehicles.view')
+                                  ? vehiclesIndex({
+                                        query: { status: 'reserved' },
+                                    })
+                                  : undefined
+                        "
+                    />
+                    <StatCard
+                        label="Active Consignments"
+                        :value="String(operational.active_consignments)"
+                        :description="`${operational.pending_withdrawals} pending withdrawals`"
+                        :icon="FileCheck2"
+                        tone="warning"
+                        :href="
+                            can('consignments.view')
+                                ? consignmentsIndex({
+                                      query: { status: 'active' },
+                                  })
+                                : undefined
+                        "
+                    />
+                    <StatCard
+                        label="Sales This Month"
+                        :value="String(operational.monthly_sales_count)"
+                        description="Confirmed & completed sales"
+                        :icon="BadgeDollarSign"
+                        tone="success"
+                        :href="can('sales.view') ? salesIndex() : undefined"
                     />
                 </div>
-            </template>
+            </Deferred>
+        </section>
 
-            <div
-                v-if="operational"
-                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        <!-- Financial KPIs (Permission-gated + Clickable + Deferred) -->
+        <section
+            v-if="canViewFinancials"
+            class="space-y-3"
+            aria-label="Financial metrics"
+        >
+            <h2
+                class="px-0.5 text-xs font-semibold tracking-wider text-muted-foreground uppercase"
             >
-                <StatCard
-                    label="Available Vehicles"
-                    :value="String(operational.available_vehicles)"
-                    :description="`${operational.total_vehicles} total active stock`"
-                    :icon="Car"
-                    tone="primary"
-                />
-                <StatCard
-                    label="Reserved Vehicles"
-                    :value="String(operational.reserved_vehicles)"
-                    description="Deposit-backed reservations"
-                    :icon="CalendarCheck2"
-                    tone="info"
-                />
-                <StatCard
-                    label="Active Consignments"
-                    :value="String(operational.active_consignments)"
-                    :description="`${operational.pending_withdrawals} pending withdrawals`"
-                    :icon="FileCheck2"
-                    tone="warning"
-                />
-                <StatCard
-                    label="Sales This Month"
-                    :value="String(operational.monthly_sales_count)"
-                    description="Confirmed & completed sales"
-                    :icon="BadgeDollarSign"
-                    tone="success"
-                />
-            </div>
-        </Deferred>
+                Financial Snapshot
+            </h2>
+            <Deferred data="financial">
+                <template #fallback>
+                    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                        <div
+                            v-for="i in 4"
+                            :key="i"
+                            class="h-30 animate-pulse rounded-xl border bg-card/60"
+                        />
+                    </div>
+                </template>
 
-        <!-- Financial KPIs (Permission-gated + Deferred) -->
-        <Deferred v-if="canViewFinancials" data="financial">
-            <template #fallback>
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div
-                        v-for="i in 4"
-                        :key="i"
-                        class="h-28 animate-pulse rounded-xl border bg-muted/40"
+                <div
+                    v-if="financial"
+                    class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+                >
+                    <StatCard
+                        label="Monthly Sales Value"
+                        :value="formatMoney(financial.monthly_sales_value)"
+                        :description="`Company Net: ${formatMoney(financial.company_net_cashflow)}`"
+                        :icon="TrendingUp"
+                        tone="success"
+                        :href="can('sales.view') ? salesIndex() : undefined"
+                    />
+                    <StatCard
+                        label="Customer Receivables"
+                        :value="formatMoney(financial.customer_receivables)"
+                        description="Unpaid installment balances"
+                        :icon="Wallet"
+                        tone="warning"
+                        :href="
+                            can('sales.view')
+                                ? salesIndex({ query: { status: 'confirmed' } })
+                                : undefined
+                        "
+                    />
+                    <StatCard
+                        label="Owner Payables"
+                        :value="formatMoney(financial.owner_payables)"
+                        :description="`${financial.locked_settlements_count} locked awaiting buyer payment`"
+                        :icon="Landmark"
+                        tone="info"
+                        :href="
+                            can('settlements.view')
+                                ? settlementsIndex()
+                                : undefined
+                        "
+                    />
+                    <StatCard
+                        label="Monthly Vehicle Expenses"
+                        :value="formatMoney(financial.monthly_expenses)"
+                        :description="`Owner Funds Held: ${formatMoney(financial.third_party_held)}`"
+                        :icon="Receipt"
+                        tone="danger"
+                        :href="
+                            can('expenses.view') ? expensesIndex() : undefined
+                        "
                     />
                 </div>
-            </template>
+            </Deferred>
+        </section>
 
-            <div
-                v-if="financial"
-                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-            >
-                <StatCard
-                    label="Monthly Sales Value"
-                    :value="formatMoney(financial.monthly_sales_value)"
-                    :description="`Company Net: ${formatMoney(financial.company_net_cashflow)}`"
-                    :icon="TrendingUp"
-                    tone="success"
+        <!-- Pending Withdrawals Actionable Alert -->
+        <Link
+            v-if="
+                operational &&
+                operational.pending_withdrawals > 0 &&
+                can('withdrawals.view')
+            "
+            :href="withdrawalsIndex()"
+            class="group flex items-center justify-between gap-3 rounded-xl border border-amber-300/90 bg-amber-50/90 px-4 py-3.5 text-sm text-amber-950 shadow-xs transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-900/70 dark:bg-amber-950/35 dark:text-amber-200"
+        >
+            <div class="flex items-center gap-2.5">
+                <RotateCcw
+                    class="size-4 shrink-0 text-amber-600 dark:text-amber-400"
                 />
-                <StatCard
-                    label="Customer Receivables"
-                    :value="formatMoney(financial.customer_receivables)"
-                    description="Unpaid installment balances"
-                    :icon="Wallet"
-                    tone="warning"
-                />
-                <StatCard
-                    label="Owner Payables"
-                    :value="formatMoney(financial.owner_payables)"
-                    :description="`${financial.locked_settlements_count} locked awaiting buyer payment`"
-                    :icon="Landmark"
-                    tone="info"
-                />
-                <StatCard
-                    label="Monthly Vehicle Expenses"
-                    :value="formatMoney(financial.monthly_expenses)"
-                    :description="`Owner Funds Held: ${formatMoney(financial.third_party_held)}`"
-                    :icon="Receipt"
-                    tone="danger"
-                />
+                <span>
+                    There
+                    {{ operational.pending_withdrawals === 1 ? 'is' : 'are' }}
+                    <strong>{{ operational.pending_withdrawals }}</strong>
+                    pending consignment withdrawal request{{
+                        operational.pending_withdrawals === 1 ? '' : 's'
+                    }}
+                    awaiting payment clearance or handover.
+                </span>
             </div>
-        </Deferred>
+            <span
+                class="inline-flex shrink-0 items-center gap-1 text-xs font-semibold"
+            >
+                Review
+                <ArrowRight
+                    class="size-3.5 transition-transform group-hover:translate-x-0.5"
+                />
+            </span>
+        </Link>
 
         <!-- Recent Sales & Activity Feed -->
         <Deferred data="operational">
             <template #fallback>
                 <div class="grid gap-5 lg:grid-cols-2">
                     <div
-                        class="h-64 animate-pulse rounded-xl border bg-muted/40"
+                        class="h-64 animate-pulse rounded-xl border bg-card/60"
                     />
                     <div
-                        class="h-64 animate-pulse rounded-xl border bg-muted/40"
+                        class="h-64 animate-pulse rounded-xl border bg-card/60"
                     />
                 </div>
             </template>
@@ -222,9 +326,18 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                     title="Recent Vehicle Sales"
                     description="Latest confirmed and completed dealership sales."
                 >
+                    <template v-if="can('sales.view')" #headerAction>
+                        <Button as-child variant="ghost" size="sm">
+                            <Link :href="salesIndex()">
+                                View all
+                                <ArrowRight class="ml-1 size-3.5" />
+                            </Link>
+                        </Button>
+                    </template>
+
                     <p
                         v-if="operational.recent_sales.length === 0"
-                        class="py-6 text-center text-sm text-muted-foreground"
+                        class="py-8 text-center text-sm text-muted-foreground"
                     >
                         No vehicle sales recorded yet.
                     </p>
@@ -232,7 +345,7 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                         <li
                             v-for="sale in operational.recent_sales"
                             :key="sale.id"
-                            class="flex items-center justify-between gap-3 py-3"
+                            class="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                         >
                             <div class="min-w-0">
                                 <Link
@@ -266,9 +379,18 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                     title="Recent Operational Activity"
                     description="Live immutable trail of staff actions across modules."
                 >
+                    <template v-if="can('audit.view')" #headerAction>
+                        <Button as-child variant="ghost" size="sm">
+                            <Link :href="auditLogsIndex()">
+                                Audit logs
+                                <ArrowRight class="ml-1 size-3.5" />
+                            </Link>
+                        </Button>
+                    </template>
+
                     <p
                         v-if="operational.recent_activities.length === 0"
-                        class="py-6 text-center text-sm text-muted-foreground"
+                        class="py-8 text-center text-sm text-muted-foreground"
                     >
                         No recent activity recorded yet.
                     </p>
@@ -276,12 +398,13 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                         <li
                             v-for="act in operational.recent_activities"
                             :key="act.id"
-                            class="flex items-start gap-3 py-2.5"
+                            class="flex items-start gap-3 py-2.5 first:pt-0 last:pb-0"
                         >
-                            <Activity
-                                class="mt-0.5 size-4 shrink-0 text-primary"
-                                aria-hidden="true"
-                            />
+                            <span
+                                class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                            >
+                                <Activity class="size-3.5" aria-hidden="true" />
+                            </span>
                             <div class="min-w-0 flex-1">
                                 <p class="text-sm text-foreground">
                                     {{ act.description }}
@@ -296,20 +419,5 @@ const { formatMoney, formatDate, formatDateTime } = useFormatting();
                 </FormSectionCard>
             </div>
         </Deferred>
-
-        <div
-            v-if="operational && operational.pending_withdrawals > 0"
-            class="flex items-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200"
-        >
-            <RotateCcw class="size-4 shrink-0" />
-            <span>
-                There {{ operational.pending_withdrawals === 1 ? 'is' : 'are' }}
-                <strong>{{ operational.pending_withdrawals }}</strong> pending
-                consignment withdrawal request{{
-                    operational.pending_withdrawals === 1 ? '' : 's'
-                }}
-                awaiting payment clearance or handover.
-            </span>
-        </div>
     </div>
 </template>

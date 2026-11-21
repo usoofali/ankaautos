@@ -3,8 +3,9 @@
 <head><meta charset="UTF-8"><title>Sales Agreement - {{ $sale->reference_number }}</title></head>
 <body>
     @include('pdfs.partials.header', [
-        'title' => 'Vehicle Sales Agreement & Invoice',
-        'subtitle' => "Sale Ref: {$sale->reference_number} | Status: {$sale->status->label()} | Date: {$sale->confirmed_at->format('d/m/Y')}",
+        'business' => $business,
+        'title' => 'Vehicle Sales Agreement',
+        'subtitle' => "Sale Ref: {$sale->reference_number} | Status: {$sale->status->label()} | Date: {$sale->confirmed_at->format('d M Y')}",
     ])
 
     <div class="section">
@@ -32,7 +33,7 @@
     </div>
 
     <div class="section">
-        <div class="section-title">2. Financial Summary</div>
+        <div class="section-title">2. Agreed Pricing &amp; Payment Terms</div>
         <table class="grid">
             <tr><td class="label">List Price</td><td class="num">&#8358;{{ number_format((float) $sale->list_price, 2) }}</td></tr>
             <tr><td class="label">Approved Discount</td><td class="num">- &#8358;{{ number_format((float) $sale->discount_amount, 2) }}</td></tr>
@@ -41,7 +42,9 @@
             <tr><td class="label">Outstanding Balance</td><td class="num"><strong>&#8358;{{ number_format((float) $sale->balance_due, 2) }}</strong></td></tr>
         </table>
         @if($sale->is_installment && $sale->installment_terms)
-            <p><strong>Installment Terms:</strong> {{ $sale->installment_terms }}</p>
+            <div class="terms-box">
+                <strong>Installment Terms:</strong> {{ $sale->installment_terms }}
+            </div>
         @endif
     </div>
 

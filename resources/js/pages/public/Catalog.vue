@@ -6,10 +6,12 @@ import {
     Gauge,
     MapPin,
     MessageCircle,
+    Moon,
     Phone,
     Search,
     Settings2,
     ShieldCheck,
+    Sun,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import StatusBadge, {
@@ -17,6 +19,7 @@ import StatusBadge, {
 } from '@/components/anka/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAppearance } from '@/composables/useAppearance';
 import { useFormatting } from '@/composables/useFormatting';
 import { dashboard, home, login } from '@/routes';
 import { show as showListing } from '@/routes/public/listings';
@@ -64,6 +67,11 @@ const props = defineProps<{
 const page = usePage();
 const isLoggedIn = computed(() => Boolean(page.props.auth?.user));
 const { formatMoney } = useFormatting();
+const { resolvedAppearance, updateAppearance } = useAppearance();
+
+function toggleTheme(): void {
+    updateAppearance(resolvedAppearance.value === 'dark' ? 'light' : 'dark');
+}
 
 const search = ref(props.filters.search);
 const brandId = ref<string | number>(props.filters.brand_id ?? '');
@@ -100,10 +108,12 @@ function whatsappHref(message: string): string {
 <template>
     <Head :title="`${business.name} — ${business.tagline}`" />
 
-    <div class="flex min-h-screen flex-col bg-background text-foreground">
+    <div
+        class="anka-catalog-texture flex min-h-screen flex-col text-foreground"
+    >
         <!-- Branded Top Bar -->
         <header
-            class="sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur"
+            class="sticky top-0 z-30 border-b border-border/75 bg-background/90 shadow-xs backdrop-blur-md"
         >
             <div
                 class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6"
@@ -117,6 +127,29 @@ function whatsappHref(message: string): string {
                 </Link>
 
                 <div class="flex items-center gap-2 sm:gap-3">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        class="size-10 rounded-lg text-muted-foreground hover:text-foreground"
+                        :aria-label="
+                            resolvedAppearance === 'dark'
+                                ? 'Switch to light theme'
+                                : 'Switch to dark theme'
+                        "
+                        @click="toggleTheme"
+                    >
+                        <Sun
+                            v-if="resolvedAppearance === 'dark'"
+                            class="size-4.5 text-amber-400"
+                            aria-hidden="true"
+                        />
+                        <Moon
+                            v-else
+                            class="size-4.5 text-primary"
+                            aria-hidden="true"
+                        />
+                    </Button>
                     <a
                         v-if="business.whatsapp"
                         :href="
@@ -126,29 +159,42 @@ function whatsappHref(message: string): string {
                         "
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="hidden min-h-10 items-center gap-1.5 rounded-md bg-emerald-600 px-3.5 text-sm font-medium text-white transition hover:bg-emerald-700 sm:inline-flex"
+                        class="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-xs font-medium text-white transition hover:bg-emerald-700 sm:min-h-10 sm:px-3.5 sm:text-sm"
                     >
                         <MessageCircle class="size-4" aria-hidden="true" />
-                        WhatsApp Sales
+                        WhatsApp
                     </a>
-                    <Button
-                        v-if="isLoggedIn"
-                        as-child
-                        variant="default"
-                        class="min-h-10"
-                    >
-                        <Link :href="dashboard()">Staff Portal</Link>
-                    </Button>
-                    <Button v-else as-child variant="outline" class="min-h-10">
-                        <Link :href="login()">Staff Login</Link>
-                    </Button>
                 </div>
             </div>
         </header>
 
-        <!-- Hero Section (Anka Deep Navy + Crimson Accent) -->
-        <section class="relative overflow-hidden bg-[#0A2E5C] text-white">
-            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20">
+        <!-- Hero Section (Anka Deep Navy + Subtle Animated Grid & Ambient Orbs) -->
+        <section
+            class="relative overflow-hidden bg-gradient-to-br from-[#072144] via-[#0A2E5C] to-[#0d3b75] text-white"
+        >
+            <!-- Subtle animated architectural grid texture -->
+            <div
+                class="anka-hero-grid pointer-events-none absolute inset-0"
+                aria-hidden="true"
+            />
+            <!-- Soft breathing radial light accents -->
+            <div
+                class="anka-hero-orb pointer-events-none absolute -top-24 -right-20 size-96 rounded-full bg-[#DC141E]/22 blur-3xl"
+                aria-hidden="true"
+            />
+            <div
+                class="anka-hero-orb-delayed pointer-events-none absolute -bottom-28 -left-24 size-96 rounded-full bg-sky-400/18 blur-3xl"
+                aria-hidden="true"
+            />
+            <!-- Bottom hairline highlight -->
+            <div
+                class="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+                aria-hidden="true"
+            />
+
+            <div
+                class="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:py-20"
+            >
                 <div class="max-w-3xl">
                     <span
                         class="inline-flex items-center gap-1.5 rounded-full bg-[#DC141E]/20 px-3 py-1 text-xs font-semibold tracking-wide text-rose-200 ring-1 ring-[#DC141E]/40"
@@ -274,7 +320,7 @@ function whatsappHref(message: string): string {
                 <article
                     v-for="v in vehicles.data"
                     :key="v.id"
-                    class="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-xs transition hover:-translate-y-0.5 hover:shadow-md"
+                    class="group flex flex-col overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-lg"
                 >
                     <Link
                         :href="showListing(v.slug)"
@@ -424,7 +470,9 @@ function whatsappHref(message: string): string {
                         {{ business.address }}
                     </p>
                 </div>
-                <div class="flex flex-col gap-1 text-xs sm:text-right">
+                <div
+                    class="flex flex-col gap-2 text-xs sm:items-end sm:text-right"
+                >
                     <p
                         v-if="business.phone"
                         class="flex items-center gap-1.5 sm:justify-end"
@@ -433,6 +481,25 @@ function whatsappHref(message: string): string {
                         {{ business.phone }}
                     </p>
                     <p v-if="business.email">{{ business.email }}</p>
+                    <div class="pt-1">
+                        <Button
+                            v-if="isLoggedIn"
+                            as-child
+                            size="sm"
+                            class="min-h-9 bg-white text-[#0A2E5C] hover:bg-slate-100"
+                        >
+                            <Link :href="dashboard()">Staff Portal</Link>
+                        </Button>
+                        <Button
+                            v-else
+                            as-child
+                            variant="outline"
+                            size="sm"
+                            class="min-h-9 border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                        >
+                            <Link :href="login()">Staff Login</Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </footer>

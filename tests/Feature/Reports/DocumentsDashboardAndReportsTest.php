@@ -6,6 +6,7 @@ use App\Models\DocumentAccessLog;
 use App\Models\DocumentCategory;
 use App\Models\User;
 use App\Models\Vehicle;
+use Database\Seeders\DemoSeeder;
 use Database\Seeders\MasterDataSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
@@ -98,4 +99,15 @@ test('dashboard respects financial permission gating and all 8 reports export cl
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
     }
+});
+
+test('optional demo seeder runs idempotently and populates storefront and dashboard', function () {
+    $this->seed(DemoSeeder::class);
+    $this->seed(DemoSeeder::class);
+
+    $this->get(route('home'))->assertOk();
+
+    $admin = User::query()->where('email', 'admin@ankaautos.com')->firstOrFail();
+    $this->actingAs($admin)->get(route('dashboard'))->assertOk();
+    $this->actingAs($admin)->get(route('reports.show', 'profitability'))->assertOk();
 });

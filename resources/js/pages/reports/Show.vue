@@ -70,45 +70,53 @@ function queryParams(): Record<string, string> {
 <template>
     <Head :title="report.title" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader :title="report.title" :description="report.description">
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" />
-                        All Reports
-                    </Link>
-                </Button>
-                <Button as-child variant="outline" class="min-h-10">
-                    <a
-                        :href="
-                            exportCsv.url(report.slug, {
-                                query: queryParams(),
-                            })
-                        "
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
+                >
+                    <Button
+                        as-child
+                        variant="outline"
+                        class="col-span-2 min-h-10 sm:col-span-1"
                     >
-                        <FileSpreadsheet class="mr-1.5 size-4" />
-                        Export CSV
-                    </a>
-                </Button>
-                <Button as-child class="min-h-10">
-                    <a
-                        :href="
-                            exportPdf.url(report.slug, {
-                                query: queryParams(),
-                            })
-                        "
-                    >
-                        <FileText class="mr-1.5 size-4" />
-                        Export PDF
-                    </a>
-                </Button>
+                        <Link :href="index()">
+                            <ArrowLeft class="mr-1.5 size-4 shrink-0" />
+                            All Reports
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a
+                            :href="
+                                exportCsv.url(report.slug, {
+                                    query: queryParams(),
+                                })
+                            "
+                        >
+                            <FileSpreadsheet class="mr-1.5 size-4 shrink-0" />
+                            Export CSV
+                        </a>
+                    </Button>
+                    <Button as-child class="min-h-10">
+                        <a
+                            :href="
+                                exportPdf.url(report.slug, {
+                                    query: queryParams(),
+                                })
+                            "
+                        >
+                            <FileText class="mr-1.5 size-4 shrink-0" />
+                            Export PDF
+                        </a>
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
         <!-- Date Range Filter -->
         <form
-            class="flex flex-wrap items-end gap-3 rounded-xl border bg-card p-4"
+            class="grid gap-3 rounded-xl border border-border/90 bg-card p-4 shadow-sm sm:flex sm:flex-wrap sm:items-end"
             @submit.prevent="applyDateFilter"
         >
             <div class="grid gap-1">
@@ -117,7 +125,7 @@ function queryParams(): Record<string, string> {
                     id="from_date"
                     v-model="fromDate"
                     type="date"
-                    class="min-h-10 w-44"
+                    class="min-h-10 w-full sm:w-44"
                 />
             </div>
             <div class="grid gap-1">
@@ -126,50 +134,93 @@ function queryParams(): Record<string, string> {
                     id="to_date"
                     v-model="toDate"
                     type="date"
-                    class="min-h-10 w-44"
+                    class="min-h-10 w-full sm:w-44"
                 />
             </div>
-            <Button type="submit" variant="secondary" class="min-h-10">
-                <Filter class="mr-1.5 size-4" />
-                Apply Period
-            </Button>
-            <Button
-                v-if="fromDate || toDate"
-                type="button"
-                variant="ghost"
-                class="min-h-10"
-                @click="clearFilter"
-            >
-                Clear
-            </Button>
+            <div class="flex gap-2">
+                <Button
+                    type="submit"
+                    variant="secondary"
+                    class="min-h-10 flex-1 sm:flex-none"
+                >
+                    <Filter class="mr-1.5 size-4" />
+                    Apply Period
+                </Button>
+                <Button
+                    v-if="fromDate || toDate"
+                    type="button"
+                    variant="ghost"
+                    class="min-h-10"
+                    @click="clearFilter"
+                >
+                    Clear
+                </Button>
+            </div>
         </form>
 
         <!-- Summary Strip -->
         <div
             v-if="report.summary.length > 0"
-            class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         >
             <div
                 v-for="item in report.summary"
                 :key="item.label"
-                class="rounded-xl border bg-card p-4 shadow-xs"
+                class="rounded-xl border border-border/90 bg-card p-4 shadow-sm"
             >
-                <p class="text-xs font-medium text-muted-foreground">
+                <p
+                    class="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                >
                     {{ item.label }}
                 </p>
-                <p class="mt-1 text-xl font-bold text-foreground tabular-nums">
+                <p
+                    class="mt-1.5 text-lg leading-tight font-bold break-words text-foreground tabular-nums sm:text-xl"
+                >
                     {{ item.value }}
                 </p>
             </div>
         </div>
 
         <!-- Report Table Card -->
-        <div class="overflow-hidden rounded-xl border bg-card shadow-xs">
+        <div
+            class="overflow-hidden rounded-xl border border-border/90 bg-card shadow-sm"
+        >
+            <!-- Mobile Stacked Report Cards (< md) -->
+            <div class="divide-y md:hidden">
+                <p
+                    v-if="report.rows.length === 0"
+                    class="px-4 py-10 text-center text-sm text-muted-foreground"
+                >
+                    No records matched the selected period.
+                </p>
+                <div
+                    v-for="(row, rIdx) in report.rows"
+                    :key="rIdx"
+                    class="space-y-2 p-4 text-sm"
+                >
+                    <div
+                        v-for="(cell, cIdx) in row"
+                        :key="cIdx"
+                        class="flex items-baseline justify-between gap-3"
+                    >
+                        <span class="text-xs font-medium text-muted-foreground">
+                            {{ report.headers[cIdx] }}
+                        </span>
+                        <span
+                            class="text-right font-medium break-words tabular-nums"
+                        >
+                            {{ cell }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desktop Table (md+) -->
             <div
                 role="region"
                 tabindex="0"
                 :aria-label="report.title"
-                class="overflow-x-auto"
+                class="hidden overflow-x-auto md:block"
             >
                 <table class="w-full text-sm">
                     <thead>

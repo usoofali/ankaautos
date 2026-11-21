@@ -163,3 +163,97 @@
         font-variant-numeric: tabular-nums;
     }
 }
+
+/* Refined Anka Auto Sales surface & subtle animated hero textures */
+.anka-app-canvas {
+    background-color: oklch(0.962 0.007 252);
+    background-image: radial-gradient(
+        oklch(0.305 0.098 253 / 0.055) 1px,
+        transparent 1px
+    );
+    background-size: 22px 22px;
+}
+
+.dark .anka-app-canvas {
+    background-color: oklch(0.13 0.024 253);
+    background-image: radial-gradient(
+        oklch(0.75 0.03 252 / 0.055) 1px,
+        transparent 1px
+    );
+    background-size: 22px 22px;
+}
+
+.anka-catalog-texture {
+    background-color: oklch(0.974 0.006 252);
+    background-image: radial-gradient(
+        oklch(0.305 0.098 253 / 0.06) 1px,
+        transparent 1px
+    );
+    background-size: 24px 24px;
+}
+
+.dark .anka-catalog-texture {
+    background-color: oklch(0.135 0.025 253);
+    background-image: radial-gradient(
+        oklch(0.8 0.03 252 / 0.05) 1px,
+        transparent 1px
+    );
+    background-size: 24px 24px;
+}
+
+@keyframes anka-grid-drift {
+    0% {
+        background-position:
+            0 0,
+            0 0;
+    }
+    100% {
+        background-position:
+            48px 48px,
+            48px 48px;
+    }
+}
+
+@keyframes anka-orb-float {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.45;
+    }
+    50% {
+        transform: translate3d(24px, -16px, 0) scale(1.08);
+        opacity: 0.72;
+    }
+}
+
+.anka-hero-grid {
+    background-image:
+        linear-gradient(
+            to right,
+            rgb(255 255 255 / 0.065) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            to bottom,
+            rgb(255 255 255 / 0.065) 1px,
+            transparent 1px
+        );
+    background-size: 48px 48px;
+    animation: anka-grid-drift 28s linear infinite;
+}
+
+.anka-hero-orb {
+    animation: anka-orb-float 14s ease-in-out infinite;
+}
+
+.anka-hero-orb-delayed {
+    animation: anka-orb-float 18s ease-in-out -6s infinite reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anka-hero-grid,
+    .anka-hero-orb,
+    .anka-hero-orb-delayed {
+        animation: none;
+    }
+}

@@ -125,32 +125,46 @@ function updateQuery(overrides: Record<string, string | number>): void {
 
             <template #mobile-card="{ row }">
                 <div class="space-y-2.5">
-                    <div class="flex items-start justify-between gap-2">
-                        <div>
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="min-w-0">
                             <Link
                                 :href="show(row.id)"
-                                class="font-mono text-xs font-semibold hover:underline"
+                                class="font-mono text-xs font-semibold text-primary hover:underline"
                             >
                                 {{ row.reference_number }}
                             </Link>
-                            <p class="font-semibold">{{ row.vehicle_title }}</p>
+                            <p class="mt-0.5 font-semibold break-words">
+                                {{ row.vehicle_title }}
+                            </p>
                             <p class="text-xs text-muted-foreground">
                                 {{ row.customer_name }}
                             </p>
                         </div>
                         <StatusBadge
+                            class="shrink-0"
                             :label="row.status_label"
                             :variant="row.status_variant"
                         />
                     </div>
-                    <div class="flex justify-between text-xs tabular-nums">
-                        <span
-                            >Deposit:
-                            <strong>{{
-                                formatMoney(row.deposit_amount)
-                            }}</strong></span
-                        >
-                        <span>Price: {{ formatMoney(row.agreed_price) }}</span>
+                    <div class="space-y-1 border-t pt-2 text-xs tabular-nums">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-muted-foreground"
+                                >Deposit Paid</span
+                            >
+                            <span
+                                class="shrink-0 font-semibold text-emerald-700 dark:text-emerald-400"
+                            >
+                                {{ formatMoney(row.deposit_amount) }}
+                            </span>
+                        </div>
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-muted-foreground"
+                                >Agreed Price</span
+                            >
+                            <span class="shrink-0 font-semibold">
+                                {{ formatMoney(row.agreed_price) }}
+                            </span>
+                        </div>
                     </div>
                     <Button
                         as-child
@@ -164,7 +178,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
             </template>
 
             <template #row="{ row }">
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <Link
                         :href="show(row.id)"
                         class="font-mono text-xs font-semibold hover:underline"
@@ -181,10 +195,14 @@ function updateQuery(overrides: Record<string, string | number>): void {
                         {{ row.customer_name }}
                     </div>
                 </td>
-                <td class="px-4 py-3.5 text-right font-semibold tabular-nums">
+                <td
+                    class="px-4 py-3.5 text-right font-semibold whitespace-nowrap tabular-nums"
+                >
                     {{ formatMoney(row.deposit_amount) }}
                 </td>
-                <td class="px-4 py-3.5 text-right tabular-nums">
+                <td
+                    class="px-4 py-3.5 text-right whitespace-nowrap tabular-nums"
+                >
                     {{ formatMoney(row.agreed_price) }}
                 </td>
                 <td class="px-4 py-3.5">
@@ -193,7 +211,7 @@ function updateQuery(overrides: Record<string, string | number>): void {
                         :variant="row.status_variant"
                     />
                 </td>
-                <td class="px-4 py-3.5 text-right">
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
                     <Button
                         as-child
                         variant="outline"

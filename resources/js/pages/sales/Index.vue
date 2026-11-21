@@ -125,7 +125,7 @@ function updateQuery(
             </template>
         </PageHeader>
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
                 label="Total Sales Value"
                 :value="formatMoney(summary.total_sales_value)"
@@ -199,15 +199,15 @@ function updateQuery(
 
             <template #mobile-card="{ row }">
                 <div class="space-y-2.5">
-                    <div class="flex items-start justify-between gap-2">
-                        <div>
+                    <div class="flex items-start justify-between gap-2.5">
+                        <div class="min-w-0">
                             <Link
                                 :href="show(row.id)"
                                 class="font-mono text-sm font-semibold text-primary hover:underline"
                             >
                                 {{ row.reference_number }}
                             </Link>
-                            <p class="mt-0.5 text-sm font-medium">
+                            <p class="mt-0.5 text-sm font-medium break-words">
                                 {{ row.vehicle_title }}
                             </p>
                             <p class="text-xs text-muted-foreground">
@@ -216,32 +216,44 @@ function updateQuery(
                             </p>
                         </div>
                         <StatusBadge
+                            class="shrink-0"
                             :label="row.status_label"
                             :variant="row.status_variant"
                         />
                     </div>
-                    <div
-                        class="grid grid-cols-3 gap-2 border-t pt-2 text-xs tabular-nums"
-                    >
-                        <div>
-                            <span class="text-muted-foreground">Final</span>
-                            <p class="font-semibold">
+                    <div class="space-y-1 border-t pt-2.5 text-xs tabular-nums">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-muted-foreground"
+                                >Final Price</span
+                            >
+                            <span class="shrink-0 font-semibold">
                                 {{ formatMoney(row.final_price) }}
-                            </p>
+                            </span>
                         </div>
-                        <div>
-                            <span class="text-muted-foreground">Paid</span>
-                            <p
-                                class="font-semibold text-emerald-700 dark:text-emerald-400"
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-muted-foreground"
+                                >Amount Paid</span
+                            >
+                            <span
+                                class="shrink-0 font-semibold text-emerald-700 dark:text-emerald-400"
                             >
                                 {{ formatMoney(row.amount_paid) }}
-                            </p>
+                            </span>
                         </div>
-                        <div>
-                            <span class="text-muted-foreground">Balance</span>
-                            <p class="font-semibold">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <span class="text-muted-foreground"
+                                >Balance Due</span
+                            >
+                            <span
+                                class="shrink-0 font-semibold"
+                                :class="
+                                    Number(row.balance_due) > 0
+                                        ? 'text-amber-700 dark:text-amber-400'
+                                        : 'text-muted-foreground'
+                                "
+                            >
                                 {{ formatMoney(row.balance_due) }}
-                            </p>
+                            </span>
                         </div>
                     </div>
                     <Button
@@ -256,7 +268,7 @@ function updateQuery(
             </template>
 
             <template #row="{ row }">
-                <td class="px-4 py-3.5">
+                <td class="px-4 py-3.5 whitespace-nowrap">
                     <Link
                         :href="show(row.id)"
                         class="font-mono text-sm font-semibold text-primary hover:underline"
@@ -276,16 +288,18 @@ function updateQuery(
                         {{ row.vehicle_reference }} · {{ row.customer_name }}
                     </div>
                 </td>
-                <td class="px-4 py-3.5 text-right font-medium tabular-nums">
+                <td
+                    class="px-4 py-3.5 text-right font-medium whitespace-nowrap tabular-nums"
+                >
                     {{ formatMoney(row.final_price) }}
                 </td>
                 <td
-                    class="px-4 py-3.5 text-right text-emerald-700 tabular-nums dark:text-emerald-400"
+                    class="px-4 py-3.5 text-right whitespace-nowrap text-emerald-700 tabular-nums dark:text-emerald-400"
                 >
                     {{ formatMoney(row.amount_paid) }}
                 </td>
                 <td
-                    class="px-4 py-3.5 text-right font-medium tabular-nums"
+                    class="px-4 py-3.5 text-right font-medium whitespace-nowrap tabular-nums"
                     :class="
                         Number(row.balance_due) > 0
                             ? 'text-amber-700 dark:text-amber-400'
@@ -308,11 +322,11 @@ function updateQuery(
                     </div>
                 </td>
                 <td
-                    class="px-4 py-3.5 text-xs text-muted-foreground tabular-nums"
+                    class="px-4 py-3.5 text-xs whitespace-nowrap text-muted-foreground tabular-nums"
                 >
                     {{ formatDate(row.confirmed_at) }}
                 </td>
-                <td class="px-4 py-3.5 text-right">
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
                     <Button
                         as-child
                         variant="outline"

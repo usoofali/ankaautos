@@ -73,9 +73,34 @@ class WithdrawalController extends Controller
                 'requested_at' => $w->requested_at->toISOString(),
             ]);
 
+        $eligibleConsignments = Consignment::query()
+            ->with(['vehicle.brand:id,name', 'vehicle.model:id,name', 'owner:id,name,phone'])
+            ->whereIn('status', [ConsignmentStatus::Active->value, ConsignmentStatus::OnHold->value])
+            ->latest('received_at')
+            ->limit(10)
+            ->get()
+            ->map(static fn (Consignment $c): array => [
+                'id' => $c->id,
+                'reference_number' => $c->reference_number,
+                'vehicle_title' => $c->vehicle?->displayName() ?? '—',
+                'vehicle_reference' => $c->vehicle->reference_number ?? '—',
+                'owner_name' => $c->owner->name ?? '—',
+                'status_label' => $c->status->label(),
+                'status_variant' => $c->status->badgeVariant(),
+            ])
+            ->values()
+            ->all();
+
         return Inertia::render('withdrawals/Index', [
             'withdrawals' => $withdrawals,
             'statusOptions' => WithdrawalStatus::options(),
+            'summary' => [
+                'awaiting_payment_count' => WithdrawalRequest::query()->where('status', WithdrawalStatus::AwaitingPayment->value)->count(),
+                'ready_for_handover_count' => WithdrawalRequest::query()->where('status', WithdrawalStatus::PaidReadyForHandover->value)->count(),
+                'completed_count' => WithdrawalRequest::query()->where('status', WithdrawalStatus::Completed->value)->count(),
+                'total_collected' => (string) WithdrawalRequest::query()->where('status', '!=', WithdrawalStatus::Cancelled->value)->sum('amount_paid'),
+            ],
+            'eligibleConsignments' => $eligibleConsignments,
             'filters' => [
                 'search' => $search,
                 'status' => $status,

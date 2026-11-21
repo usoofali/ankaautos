@@ -119,8 +119,11 @@ function submit(): void {
             </template>
         </PageHeader>
 
-        <form class="grid gap-5 lg:grid-cols-3" @submit.prevent="submit">
-            <div class="flex flex-col gap-5 lg:col-span-2">
+        <form
+            class="grid min-w-0 gap-5 lg:grid-cols-3"
+            @submit.prevent="submit"
+        >
+            <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
                 <FormSectionCard
                     title="Consignment & Reason"
                     description="Select the active consignment being withdrawn by its owner."
@@ -238,11 +241,11 @@ function submit(): void {
                 description="Owner must pay 100% of this total before vehicle release."
             >
                 <dl class="space-y-3 text-sm">
-                    <div class="flex justify-between">
+                    <div class="flex items-baseline justify-between gap-3">
                         <dt class="text-muted-foreground">
                             Unsettled Owner Expenses
                         </dt>
-                        <dd class="font-medium tabular-nums">
+                        <dd class="shrink-0 font-medium tabular-nums">
                             {{
                                 formatMoney(
                                     selectedConsignment?.owner_expenses_total ??
@@ -251,19 +254,19 @@ function submit(): void {
                             }}
                         </dd>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex items-baseline justify-between gap-3">
                         <dt class="text-muted-foreground">
                             Withdrawal Charges
                         </dt>
-                        <dd class="font-medium tabular-nums">
+                        <dd class="shrink-0 font-medium tabular-nums">
                             {{ formatMoney(chargesTotal) }}
                         </dd>
                     </div>
                     <div
-                        class="flex justify-between border-t pt-2.5 text-base font-bold"
+                        class="flex items-baseline justify-between gap-3 border-t pt-2.5 text-base font-bold"
                     >
                         <dt>Total Clearance Due</dt>
-                        <dd class="tabular-nums">
+                        <dd class="shrink-0 tabular-nums">
                             {{ formatMoney(totalDuePreview) }}
                         </dd>
                     </div>

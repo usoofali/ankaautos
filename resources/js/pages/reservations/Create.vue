@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Save } from '@lucide/vue';
+import { ArrowLeft, Save, UserPlus } from '@lucide/vue';
+import { ref } from 'vue';
 import FormSectionCard from '@/components/anka/FormSectionCard.vue';
 import PageHeader from '@/components/anka/PageHeader.vue';
+import QuickCustomerModal, {
+    type QuickCustomer,
+} from '@/components/anka/QuickCustomerModal.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
 import { create, index, store } from '@/routes/reservations';
 
@@ -42,6 +47,10 @@ defineOptions({
     },
 });
 
+const { can } = usePermissions();
+const customerList = ref<QuickCustomer[]>([...props.customers]);
+const quickCustomerOpen = ref(false);
+
 const form = useForm({
     vehicle_id: props.preselectedVehicleId ?? props.vehicles[0]?.id ?? 0,
     customer_id: props.preselectedCustomerId ?? props.customers[0]?.id ?? 0,
@@ -55,6 +64,11 @@ const form = useForm({
     override_conflict: false,
     idempotency_key: crypto.randomUUID(),
 });
+
+function onCustomerCreated(customer: QuickCustomer): void {
+    customerList.value.unshift(customer);
+    form.customer_id = customer.id;
+}
 
 function submit(): void {
     form.post(store.url());
@@ -102,7 +116,23 @@ function submit(): void {
                     </div>
 
                     <div class="space-y-2 sm:col-span-2">
-                        <Label for="res_customer">Customer *</Label>
+                        <div class="flex items-center justify-between gap-2">
+                            <Label for="res_customer">Customer *</Label>
+                            <Button
+                                v-if="can('customers.manage')"
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                class="h-8 text-xs"
+                                @click="quickCustomerOpen = true"
+                            >
+                                <UserPlus
+                                    class="mr-1.5 size-3.5"
+                                    aria-hidden="true"
+                                />
+                                New Customer
+                            </Button>
+                        </div>
                         <select
                             id="res_customer"
                             v-model.number="form.customer_id"
@@ -110,7 +140,7 @@ function submit(): void {
                             class="flex min-h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
                         >
                             <option
-                                v-for="c in customers"
+                                v-for="c in customerList"
                                 :key="c.id"
                                 :value="c.id"
                             >
@@ -237,5 +267,10 @@ function submit(): void {
                 </template>
             </FormSectionCard>
         </form>
+
+        <QuickCustomerModal
+            v-model:open="quickCustomerOpen"
+            @created="onCustomerCreated"
+        />
     </div>
 </template>

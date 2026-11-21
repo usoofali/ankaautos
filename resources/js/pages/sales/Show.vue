@@ -36,6 +36,7 @@ import {
     cancel,
     handoverPdf,
     index,
+    invoicePdf,
     receiptPdf,
 } from '@/routes/sales';
 import { store as storeHandover } from '@/routes/sales/handover';
@@ -234,55 +235,83 @@ function submitCancel(): void {
 <template>
     <Head :title="`Sale ${sale.reference_number}`" />
 
-    <div class="flex flex-1 flex-col gap-5 p-4 sm:p-6">
+    <div class="flex min-w-0 flex-1 flex-col gap-5 p-4 sm:p-6">
         <PageHeader
             :title="sale.reference_number"
             :description="`${sale.vehicle_title} · Sold to ${sale.customer_name}`"
         >
             <template #actions>
-                <Button as-child variant="outline" class="min-h-10">
-                    <Link :href="index()">
-                        <ArrowLeft class="mr-1.5 size-4" aria-hidden="true" />
-                        Sales
-                    </Link>
-                </Button>
-                <Button as-child variant="outline" class="min-h-10">
-                    <a :href="agreementPdf.url(sale.id)">
-                        <FileDown class="mr-1.5 size-4" aria-hidden="true" />
-                        Sales Agreement PDF
-                    </a>
-                </Button>
-                <Button
-                    v-if="canRecordPayment"
-                    class="min-h-10"
-                    @click="openPaymentModal"
+                <div
+                    class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap"
                 >
-                    <CreditCard class="mr-1.5 size-4" aria-hidden="true" />
-                    Record Payment
-                </Button>
-                <Button
-                    v-if="canRecordHandover"
-                    variant="secondary"
-                    class="min-h-10"
-                    @click="handoverOpen = true"
-                >
-                    <KeyRound class="mr-1.5 size-4" aria-hidden="true" />
-                    Record Handover
-                </Button>
-                <Button
-                    v-if="canCancelSale"
-                    variant="destructive"
-                    class="min-h-10"
-                    @click="cancelOpen = true"
-                >
-                    <XCircle class="mr-1.5 size-4" aria-hidden="true" />
-                    Cancel Sale
-                </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <Link :href="index()">
+                            <ArrowLeft
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Sales
+                        </Link>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a :href="invoicePdf.url(sale.id)">
+                            <FileDown
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Invoice PDF
+                        </a>
+                    </Button>
+                    <Button as-child variant="outline" class="min-h-10">
+                        <a :href="agreementPdf.url(sale.id)">
+                            <FileDown
+                                class="mr-1.5 size-4 shrink-0"
+                                aria-hidden="true"
+                            />
+                            Agreement PDF
+                        </a>
+                    </Button>
+                    <Button
+                        v-if="canRecordPayment"
+                        class="min-h-10"
+                        @click="openPaymentModal"
+                    >
+                        <CreditCard
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Record Payment
+                    </Button>
+                    <Button
+                        v-if="canRecordHandover"
+                        variant="secondary"
+                        class="min-h-10"
+                        @click="handoverOpen = true"
+                    >
+                        <KeyRound
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Record Handover
+                    </Button>
+                    <Button
+                        v-if="canCancelSale"
+                        variant="destructive"
+                        class="min-h-10"
+                        @click="cancelOpen = true"
+                    >
+                        <XCircle
+                            class="mr-1.5 size-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                        Cancel Sale
+                    </Button>
+                </div>
             </template>
         </PageHeader>
 
-        <div class="grid gap-5 lg:grid-cols-3">
-            <div class="flex flex-col gap-5 lg:col-span-2">
+        <div class="grid min-w-0 gap-5 lg:grid-cols-3">
+            <div class="flex min-w-0 flex-col gap-5 lg:col-span-2">
                 <FormSectionCard title="Transaction Overview">
                     <div class="mb-4 flex flex-wrap items-center gap-2">
                         <StatusBadge
@@ -383,8 +412,8 @@ function submitCancel(): void {
                 </FormSectionCard>
 
                 <FormSectionCard
-                    title="Payment History & Receipts"
-                    description="All customer collections applied to this vehicle sale."
+                    title="Payment History & Per-Transaction Receipts"
+                    description="Every payment (deposit, initial payment, or installment) generates a custom receipt for that transaction. Use Invoice PDF above for a consolidated invoice covering all payments."
                 >
                     <div
                         v-if="sale.payments.length === 0"
@@ -392,79 +421,175 @@ function submitCancel(): void {
                     >
                         No payments recorded yet.
                     </div>
-                    <div v-else class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr
-                                    class="border-b text-left text-xs text-muted-foreground"
+                    <template v-else>
+                        <!-- Mobile Stacked Payment Cards (< md) -->
+                        <div class="space-y-3 md:hidden">
+                            <div
+                                v-for="p in sale.payments"
+                                :key="p.id"
+                                class="rounded-lg border border-border/80 bg-muted/20 p-3.5"
+                            >
+                                <div
+                                    class="flex items-start justify-between gap-3"
                                 >
-                                    <th class="pb-2 font-medium">Receipt</th>
-                                    <th class="pb-2 font-medium">
-                                        Type & Method
-                                    </th>
-                                    <th class="pb-2 font-medium">Date</th>
-                                    <th class="pb-2 text-right font-medium">
-                                        Amount
-                                    </th>
-                                    <th class="pb-2 text-right font-medium">
-                                        PDF
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y">
-                                <tr v-for="p in sale.payments" :key="p.id">
-                                    <td
-                                        class="py-3 font-mono text-xs font-semibold"
-                                    >
-                                        {{ p.reference_number }}
-                                    </td>
-                                    <td class="py-3">
-                                        <div class="font-medium">
+                                    <div class="min-w-0">
+                                        <p
+                                            class="font-mono text-xs font-semibold text-primary"
+                                        >
+                                            {{ p.reference_number }}
+                                        </p>
+                                        <p class="mt-0.5 text-sm font-medium">
                                             {{ p.payment_type_label }}
-                                        </div>
-                                        <div
-                                            class="text-xs text-muted-foreground"
+                                        </p>
+                                    </div>
+                                    <div class="shrink-0 text-right">
+                                        <p
+                                            class="text-sm font-bold text-foreground tabular-nums"
                                         >
-                                            {{ p.payment_method }} ·
-                                            {{ p.financial_account }}
-                                            <span v-if="p.external_reference">
-                                                · Ref:
-                                                {{ p.external_reference }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td
-                                        class="py-3 text-xs text-muted-foreground"
-                                    >
-                                        {{ formatDate(p.paid_at) }}
-                                    </td>
-                                    <td
-                                        class="py-3 text-right font-semibold tabular-nums"
-                                    >
-                                        {{ formatMoney(p.amount) }}
-                                    </td>
-                                    <td class="py-3 text-right">
-                                        <Button
-                                            as-child
-                                            variant="ghost"
-                                            size="sm"
+                                            {{ formatMoney(p.amount) }}
+                                        </p>
+                                        <p
+                                            class="text-xs text-muted-foreground tabular-nums"
                                         >
-                                            <a
-                                                :href="
-                                                    receiptPdf.url({
-                                                        sale: sale.id,
-                                                        payment: p.id,
-                                                    })
-                                                "
+                                            {{ formatDate(p.paid_at) }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-xs text-muted-foreground">
+                                    {{ p.payment_method }} ·
+                                    {{ p.financial_account }}
+                                    <span v-if="p.external_reference">
+                                        · Ref: {{ p.external_reference }}
+                                    </span>
+                                </p>
+                                <Button
+                                    as-child
+                                    variant="outline"
+                                    size="sm"
+                                    class="mt-3 min-h-9 w-full"
+                                >
+                                    <a
+                                        :href="
+                                            receiptPdf.url({
+                                                sale: sale.id,
+                                                payment: p.id,
+                                            })
+                                        "
+                                    >
+                                        <FileDown class="mr-1.5 size-3.5" />
+                                        Download Receipt PDF
+                                    </a>
+                                </Button>
+                            </div>
+                        </div>
+
+                        <!-- Desktop Padded Table (md+) -->
+                        <div
+                            class="hidden overflow-x-auto md:block"
+                            role="region"
+                            tabindex="0"
+                            aria-label="Payment history and per-transaction receipts"
+                        >
+                            <table class="w-full min-w-[640px] text-sm">
+                                <thead>
+                                    <tr
+                                        class="border-b text-left text-xs text-muted-foreground"
+                                    >
+                                        <th
+                                            scope="col"
+                                            class="pr-4 pb-2.5 font-medium whitespace-nowrap"
+                                        >
+                                            Receipt
+                                        </th>
+                                        <th
+                                            scope="col"
+                                            class="px-3 pb-2.5 font-medium"
+                                        >
+                                            Type &amp; Method
+                                        </th>
+                                        <th
+                                            scope="col"
+                                            class="px-3 pb-2.5 font-medium whitespace-nowrap"
+                                        >
+                                            Date
+                                        </th>
+                                        <th
+                                            scope="col"
+                                            class="px-3 pb-2.5 text-right font-medium whitespace-nowrap"
+                                        >
+                                            Amount
+                                        </th>
+                                        <th
+                                            scope="col"
+                                            class="pb-2.5 pl-3 text-right font-medium whitespace-nowrap"
+                                        >
+                                            Document
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y">
+                                    <tr v-for="p in sale.payments" :key="p.id">
+                                        <td
+                                            class="py-3 pr-4 font-mono text-xs font-semibold whitespace-nowrap"
+                                        >
+                                            {{ p.reference_number }}
+                                        </td>
+                                        <td class="px-3 py-3">
+                                            <div class="font-medium">
+                                                {{ p.payment_type_label }}
+                                            </div>
+                                            <div
+                                                class="text-xs text-muted-foreground"
                                             >
-                                                <FileDown class="size-4" />
-                                            </a>
-                                        </Button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                                {{ p.payment_method }} ·
+                                                {{ p.financial_account }}
+                                                <span
+                                                    v-if="p.external_reference"
+                                                >
+                                                    · Ref:
+                                                    {{ p.external_reference }}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td
+                                            class="px-3 py-3 text-xs whitespace-nowrap text-muted-foreground tabular-nums"
+                                        >
+                                            {{ formatDate(p.paid_at) }}
+                                        </td>
+                                        <td
+                                            class="px-3 py-3 text-right font-semibold whitespace-nowrap tabular-nums"
+                                        >
+                                            {{ formatMoney(p.amount) }}
+                                        </td>
+                                        <td
+                                            class="py-3 pl-3 text-right whitespace-nowrap"
+                                        >
+                                            <Button
+                                                as-child
+                                                variant="outline"
+                                                size="sm"
+                                                class="min-h-8"
+                                            >
+                                                <a
+                                                    :href="
+                                                        receiptPdf.url({
+                                                            sale: sale.id,
+                                                            payment: p.id,
+                                                        })
+                                                    "
+                                                >
+                                                    <FileDown
+                                                        class="mr-1 size-3.5"
+                                                    />
+                                                    Receipt
+                                                </a>
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
                 </FormSectionCard>
 
                 <FormSectionCard
@@ -550,46 +675,46 @@ function submitCancel(): void {
                 </FormSectionCard>
             </div>
 
-            <div class="flex flex-col gap-5">
+            <div class="flex min-w-0 flex-col gap-5">
                 <FormSectionCard title="Financial Summary">
                     <dl class="space-y-3 text-sm">
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <dt class="text-muted-foreground">List Price</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(sale.list_price) }}
                             </dd>
                         </div>
                         <div
                             v-if="Number(sale.discount_amount) > 0"
-                            class="flex justify-between text-destructive"
+                            class="flex items-baseline justify-between gap-3 text-destructive"
                         >
                             <dt>Approved Discount</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 -{{ formatMoney(sale.discount_amount) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 font-semibold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 font-semibold"
                         >
                             <dt>Final Sale Price</dt>
-                            <dd class="tabular-nums">
+                            <dd class="shrink-0 tabular-nums">
                                 {{ formatMoney(sale.final_price) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between text-emerald-700 dark:text-emerald-400"
+                            class="flex items-baseline justify-between gap-3 text-emerald-700 dark:text-emerald-400"
                         >
                             <dt>Amount Paid</dt>
-                            <dd class="font-semibold tabular-nums">
+                            <dd class="shrink-0 font-semibold tabular-nums">
                                 {{ formatMoney(sale.amount_paid) }}
                             </dd>
                         </div>
                         <div
-                            class="flex justify-between border-t pt-2.5 text-base font-bold"
+                            class="flex items-baseline justify-between gap-3 border-t pt-2.5 text-base font-bold"
                         >
                             <dt>Balance Due</dt>
                             <dd
-                                class="tabular-nums"
+                                class="shrink-0 tabular-nums"
                                 :class="
                                     Number(sale.balance_due) > 0
                                         ? 'text-amber-700 dark:text-amber-400'
@@ -608,7 +733,9 @@ function submitCancel(): void {
                     description="Owner payout unlocks automatically once customer payment reaches 100%."
                 >
                     <div class="space-y-3 text-sm">
-                        <div class="flex items-center justify-between">
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-2"
+                        >
                             <span class="font-mono font-semibold">
                                 {{ sale.owner_settlement.reference_number }}
                             </span>
@@ -617,11 +744,11 @@ function submitCancel(): void {
                                 :variant="sale.owner_settlement.status_variant"
                             />
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <span class="text-muted-foreground">
                                 Net Payable to Owner
                             </span>
-                            <span class="font-semibold tabular-nums">
+                            <span class="shrink-0 font-semibold tabular-nums">
                                 {{
                                     formatMoney(
                                         sale.owner_settlement
@@ -630,11 +757,11 @@ function submitCancel(): void {
                                 }}
                             </span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex items-baseline justify-between gap-3">
                             <span class="text-muted-foreground">
                                 Unpaid Owner Balance
                             </span>
-                            <span class="font-semibold tabular-nums">
+                            <span class="shrink-0 font-semibold tabular-nums">
                                 {{
                                     formatMoney(
                                         sale.owner_settlement.balance_due,
