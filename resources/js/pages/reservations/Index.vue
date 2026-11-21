@@ -123,6 +123,15 @@ function updateQuery(overrides: Record<string, string | number>): void {
                 </select>
             </template>
 
+            <template v-if="can('reservations.manage')" #emptyAction>
+                <Button as-child class="min-h-10">
+                    <Link :href="create()">
+                        <Plus class="mr-1.5 size-4" aria-hidden="true" />
+                        New Reservation
+                    </Link>
+                </Button>
+            </template>
+
             <template #mobile-card="{ row }">
                 <div class="space-y-2.5">
                     <div class="flex items-start justify-between gap-2.5">

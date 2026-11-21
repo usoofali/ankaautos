@@ -194,6 +194,13 @@ function confirmArchive(): void {
                 </select>
             </template>
 
+            <template v-if="canManage" #emptyAction>
+                <Button class="min-h-10" @click="uploadOpen = true">
+                    <Upload class="mr-1.5 size-4" aria-hidden="true" />
+                    Upload Document
+                </Button>
+            </template>
+
             <template #mobile-card="{ row }">
                 <div class="space-y-2.5">
                     <div class="flex items-start gap-2.5">

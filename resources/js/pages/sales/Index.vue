@@ -197,6 +197,15 @@ function updateQuery(
                 </select>
             </template>
 
+            <template v-if="can('sales.create')" #emptyAction>
+                <Button as-child class="min-h-10">
+                    <Link :href="create()">
+                        <Plus class="mr-1.5 size-4" aria-hidden="true" />
+                        Record Sale
+                    </Link>
+                </Button>
+            </template>
+
             <template #mobile-card="{ row }">
                 <div class="space-y-2.5">
                     <div class="flex items-start justify-between gap-2.5">

@@ -2,16 +2,11 @@
 import type { LucideIcon } from '@lucide/vue';
 import { Inbox } from '@lucide/vue';
 
-withDefaults(
-    defineProps<{
-        title: string;
-        description?: string;
-        icon?: LucideIcon;
-    }>(),
-    {
-        icon: Inbox,
-    },
-);
+defineProps<{
+    title: string;
+    description?: string;
+    icon?: LucideIcon;
+}>();
 </script>
 
 <template>
@@ -21,7 +16,7 @@ withDefaults(
         <div
             class="mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground"
         >
-            <component :is="icon" class="size-6" aria-hidden="true" />
+            <component :is="icon ?? Inbox" class="size-6" aria-hidden="true" />
         </div>
         <h3 class="text-sm font-semibold text-foreground sm:text-base">
             {{ title }}

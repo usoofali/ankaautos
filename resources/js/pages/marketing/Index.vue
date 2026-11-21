@@ -18,9 +18,11 @@ import StatusBadge, {
 } from '@/components/anka/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { useFormatting } from '@/composables/useFormatting';
+import { usePermissions } from '@/composables/usePermissions';
 import { dashboard } from '@/routes';
 import { builder, index } from '@/routes/marketing';
 import { show as showListing } from '@/routes/public/listings';
+import { create as createVehicle } from '@/routes/vehicles';
 import type { Paginated } from '@/types';
 
 type MarketingVehicleRow = {
@@ -60,6 +62,7 @@ defineOptions({
     },
 });
 
+const { can } = usePermissions();
 const { formatMoney } = useFormatting();
 
 const columns: DataTableColumn[] = [
@@ -130,6 +133,15 @@ function updateQuery(
             "
             @update:per-page="(p) => updateQuery({ per_page: p, page: 1 })"
         >
+            <template v-if="can('vehicles.create')" #emptyAction>
+                <Button as-child class="min-h-10">
+                    <Link :href="createVehicle()">
+                        <Car class="mr-1.5 size-4" aria-hidden="true" />
+                        Register Vehicle
+                    </Link>
+                </Button>
+            </template>
+
             <template #mobile-card="{ row }">
                 <div class="space-y-3">
                     <div class="flex items-start gap-3">

@@ -232,6 +232,20 @@ function submitAdjustment(): void {
                 </select>
             </template>
 
+            <template v-if="canAdjust" #emptyAction>
+                <Button
+                    variant="outline"
+                    class="min-h-10"
+                    @click="adjustOpen = true"
+                >
+                    <SlidersHorizontal
+                        class="mr-1.5 size-4"
+                        aria-hidden="true"
+                    />
+                    Post Adjustment
+                </Button>
+            </template>
+
             <template #mobile-card="{ row }">
                 <div class="space-y-2">
                     <div class="flex items-start justify-between gap-3">
