@@ -281,7 +281,7 @@ function whatsappHref(message: string): string {
             <div class="mb-6 flex items-center justify-between gap-2">
                 <div>
                     <h2 class="text-xl font-bold tracking-tight sm:text-2xl">
-                        Available Inventory
+                        Our Inventory
                     </h2>
                     <p class="text-sm text-muted-foreground">
                         Showing {{ vehicles.total }} listed vehicle{{
@@ -321,6 +321,7 @@ function whatsappHref(message: string): string {
                     v-for="v in vehicles.data"
                     :key="v.id"
                     class="group flex flex-col overflow-hidden rounded-2xl border border-border/90 bg-card shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-lg"
+                    :class="{ 'opacity-80': v.status === 'sold' }"
                 >
                     <Link
                         :href="showListing(v.slug)"
@@ -345,6 +346,18 @@ function whatsappHref(message: string): string {
                                 :variant="v.status_variant"
                             />
                         </div>
+                        <!-- Sold overlay -->
+                        <div
+                            v-if="v.status === 'sold'"
+                            class="absolute inset-0 flex items-center justify-center bg-black/40"
+                            aria-hidden="true"
+                        >
+                            <span
+                                class="rotate-[-20deg] rounded-md border-4 border-red-500 px-5 py-1.5 text-2xl font-black tracking-widest text-red-400 uppercase opacity-90"
+                            >
+                                Sold
+                            </span>
+                        </div>
                     </Link>
 
                     <div class="flex flex-1 flex-col p-4">
@@ -362,7 +375,12 @@ function whatsappHref(message: string): string {
                         </p>
 
                         <p
-                            class="mt-3 text-xl font-extrabold text-[#0A2E5C] tabular-nums dark:text-sky-300"
+                            class="mt-3 text-xl font-extrabold tabular-nums"
+                            :class="
+                                v.status === 'sold'
+                                    ? 'text-muted-foreground line-through'
+                                    : 'text-[#0A2E5C] dark:text-sky-300'
+                            "
                         >
                             {{
                                 v.advertised_price
@@ -403,7 +421,7 @@ function whatsappHref(message: string): string {
                                 </Link>
                             </Button>
                             <Button
-                                v-if="business.whatsapp"
+                                v-if="business.whatsapp && v.status !== 'sold'"
                                 as-child
                                 variant="outline"
                                 class="min-h-10"

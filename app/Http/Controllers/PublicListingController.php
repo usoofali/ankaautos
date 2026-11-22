@@ -34,7 +34,7 @@ class PublicListingController extends Controller
                 'primaryPhoto',
             ])
             ->where('is_public_listing', true)
-            ->whereIn('status', [VehicleStatus::Available->value, VehicleStatus::Reserved->value])
+            ->whereIn('status', [VehicleStatus::Available->value, VehicleStatus::Reserved->value, VehicleStatus::Sold->value])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($sub) use ($search): void {
                     $sub->where('exterior_colour', 'like', "%{$search}%")
@@ -64,8 +64,16 @@ class PublicListingController extends Controller
                 'exterior_colour' => $v->exterior_colour,
                 'advertised_price' => $v->advertised_price,
                 'status' => $v->status->value,
-                'status_label' => $v->status === VehicleStatus::Reserved ? 'Reserved' : 'Available',
-                'status_variant' => $v->status === VehicleStatus::Reserved ? 'warning' : 'success',
+                'status_label' => match ($v->status) {
+                    VehicleStatus::Reserved => 'Reserved',
+                    VehicleStatus::Sold => 'Sold',
+                    default => 'Available',
+                },
+                'status_variant' => match ($v->status) {
+                    VehicleStatus::Reserved => 'warning',
+                    VehicleStatus::Sold => 'danger',
+                    default => 'success',
+                },
                 'photo_url' => $v->primaryPhoto?->url(),
             ]);
 
